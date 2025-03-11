@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h2 mb-4">Dashboard</h1>
+    
+    <!-- Status cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Documents</h6>
+                            <h2 class="card-text">{{ doc_count }}</h2>
+                        </div>
+                        <i class="bi bi-file-earmark-text" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <span>View Documents</span>
+                    <a href="{{ url_for('documents') }}" class="text-white">
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Paragraphs</h6>
+                            <h2 class="card-text">{{ para_count }}</h2>
+                        </div>
+                        <i class="bi bi-paragraph" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <span>View Paragraphs</span>
+                    <a href="{{ url_for('paragraphs') }}" class="text-white">
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Variables</h6>
+                            <h2 class="card-text">{{ var_count }}</h2>
+                        </div>
+                        <i class="bi bi-code-square" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <span>View Variables</span>
+                    <a href="{{ url_for('variables') }}" class="text-white">
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white {% if processing_count > 0 %}bg-warning{% elif error_count > 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Processing</h6>
+                            <h2 class="card-text">
+                                {% if processing_count > 0 %}
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    {{ processing_count }}
+                                {% elif error_count > 0 %}
+                                    <i class="bi bi-exclamation-triangle"></i> {{ error_count }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </h2>
+                        </div>
+                        <i class="bi {% if processing_count > 0 %}bi-hourglass-split{% elif error_count > 0 %}bi-x-circle{% else %}bi-check-circle{% endif %}" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <span>
+                        {% if processing_count > 0 %}
+                            Documents Processing
+                        {% elif error_count > 0 %}
+                            Processing Errors
+                        {% else %}
+                            All Complete
+                        {% endif %}
+                    </span>
+                    <a href="{{ url_for('documents') }}" class="text-white">
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick actions -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('upload') }}" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Upload New Document
+                        </a>
+                        <a href="{{ url_for('export_documents') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-file-earmark-excel"></i> Export Document List
+                        </a>
+                        <a href="{{ url_for('export_template_analysis') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-grid-3x3-gap"></i> Export Template Analysis
+                        </a>
+                        <a href="{{ url_for('export_variable_analysis') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-code-square"></i> Export Variable Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Recent Documents</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% if recent_docs %}
+                            {% for doc in recent_docs %}
+                                <a href="{{ url_for('document_view', doc_id=doc.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ doc.original_filename }}</h6>
+                                        <small class="text-muted">{{ doc.upload_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    </div>
+                                    <div>
+                                        {% if doc.status == 'processed' %}
+                                            <span class="badge bg-success status-badge">Processed</span>
+                                        {% elif doc.status == 'processing' %}
+                                            <span class="badge bg-warning status-badge">Processing</span>
+                                        {% else %}
+                                            <span class="badge bg-danger status-badge">Error</span>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="list-group-item">
+                                <p class="mb-0 text-center text-muted">No documents uploaded yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="{{ url_for('documents') }}" class="btn btn-sm btn-outline-secondary">View All</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- App description -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">About Document Analyzer</h5>
+                </div>
+                <div class="card-body">
+                    <p>Document Analyzer is an on-premise application for analyzing document templates. The application helps identify unique template layouts, common content, and variable placeholders.</p>
+                    <p>Key features:</p>
+                    <ul>
+                        <li><strong>Document Analysis:</strong> Upload PDF and Word documents to extract text and analyze content.</li>
+                        <li><strong>Paragraph Comparison:</strong> Find identical and similar paragraphs across documents.</li>
+                        <li><strong>Variable Detection:</strong> Identify placeholders like <code>&lt;&lt;variable&gt;&gt;</code> used in templates.</li>
+                        <li><strong>Template Identification:</strong> Group documents with similar layouts to identify master templates.</li>
+                        <li><strong>Export Capabilities:</strong> Generate Excel reports with detailed analysis.</li>
+                    </ul>
+                    <p>This application helps business analysts understand document templates and assists developers in planning migrations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

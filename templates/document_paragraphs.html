@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Paragraphs - {{ document.original_filename }} - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2">Document Paragraphs</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('documents') }}">Documents</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('document_view', doc_id=document.id) }}">{{ document.original_filename }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Paragraphs</li>
+                </ol>
+            </nav>
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('document_view', doc_id=document.id) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Document
+            </a>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-gear"></i> Options
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_text', doc_id=document.id) }}">
+                            <i class="bi bi-file-text me-2"></i> View Text
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_variables', doc_id=document.id) }}">
+                            <i class="bi bi-code-square me-2"></i> View Variables
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_analyze', doc_id=document.id) }}">
+                            <i class="bi bi-search me-2"></i> Analyze Content
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('export_document', doc_id=document.id) }}">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Export to Excel
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Paragraph Stats -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Paragraph Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">{{ paragraphs|length }}</h3>
+                                    <p class="card-text">Total Paragraphs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">{{ stats.avg_length|round|int }}</h3>
+                                    <p class="card-text">Avg. Length</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <table class="table table-sm mt-3">
+                        <tbody>
+                            <tr>
+                                <th>Shortest Paragraph</th>
+                                <td>{{ stats.min_length }} chars</td>
+                            </tr>
+                            <tr>
+                                <th>Longest Paragraph</th>
+                                <td>{{ stats.max_length }} chars</td>
+                            </tr>
+                            <tr>
+                                <th>Total Characters</th>
+                                <td>{{ stats.total_chars }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Filter Options -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Filter Options</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="searchParagraph" class="form-label">Search in Paragraphs</label>
+                        <input type="text" class="form-control" id="searchParagraph" placeholder="Type to search...">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="sortParagraphs" class="form-label">Sort By</label>
+                        <select class="form-select" id="sortParagraphs">
+                            <option value="position">Position (Default)</option>
+                            <option value="length_desc">Length (Longest First)</option>
+                            <option value="length_asc">Length (Shortest First)</option>
+                            <option value="doc_count_desc">Document Count (Highest First)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Filter By</label>
+                        <div class="form-check">
+                            <input class="form-check-input filter-check" type="checkbox" id="filterCommon" value="common">
+                            <label class="form-check-label" for="filterCommon">
+                                Common Paragraphs (in multiple documents)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input filter-check" type="checkbox" id="filterWithVars" value="with_vars">
+                            <label class="form-check-label" for="filterWithVars">
+                                Paragraphs with Variables
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Paragraph List -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Paragraphs</h5>
+                        <span class="badge bg-primary" id="paragraphCount">{{ paragraphs|length }}</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush paragraph-list">
+                        {% for para in paragraphs %}
+                            {% set para_has_vars = false %}
+                            {% for var in document.variables %}
+                                {% if var.full_name in para.text %}
+                                    {% set para_has_vars = true %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <div class="list-group-item paragraph-item" 
+                                 data-position="{{ loop.index }}"
+                                 data-length="{{ para.text|length }}"
+                                 data-doc-count="{{ para.document_count }}"
+                                 data-has-vars="{{ para_has_vars|lower }}"
+                                 data-is-common="{{ (para.document_count > 1)|lower }}">
+                                <div class="d-flex justify-content-between">
+                                    <span class="badge bg-secondary me-2">#{{ loop.index }}</span>
+                                    <div class="badge-container ms-auto">
+                                        {% if para.document_count > 1 %}
+                                            <span class="badge bg-success me-1" title="This paragraph appears in {{ para.document_count }} documents">
+                                                <i class="bi bi-files"></i> {{ para.document_count }}
+                                            </span>
+                                        {% endif %}
+                                        
+                                        {% if para_has_vars %}
+                                            <span class="badge bg-info text-dark me-1" title="Contains variables">
+                                                <i class="bi bi-code-square"></i> Vars
+                                            </span>
+                                        {% endif %}
+                                        
+                                        <span class="badge bg-light text-dark">
+                                            {{ para.text|length }} chars
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="paragraph-text mt-2">
+                                    {% set para_text = para.text %}
+                                    {% for var in document.variables %}
+                                        {% if var.full_name in para.text %}
+                                            {% set para_text = para_text|replace(var.full_name, '<span class="highlight-variable">' + var.full_name + '</span>') %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {{ para_text }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const paragraphItems = document.querySelectorAll('.paragraph-item');
+        const searchInput = document.getElementById('searchParagraph');
+        const sortSelect = document.getElementById('sortParagraphs');
+        const filterCheckboxes = document.querySelectorAll('.filter-check');
+        const paragraphCount = document.getElementById('paragraphCount');
+        
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            applyFilters();
+        });
+        
+        // Sort functionality
+        sortSelect.addEventListener('change', function() {
+            applySort();
+            applyFilters();
+        });
+        
+        // Filter checkboxes
+        filterCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                applyFilters();
+            });
+        });
+        
+        // Apply sort function
+        function applySort() {
+            const sortBy = sortSelect.value;
+            const paragraphList = document.querySelector('.paragraph-list');
+            const items = Array.from(paragraphItems);
+            
+            items.sort((a, b) => {
+                if (sortBy === 'position') {
+                    return parseInt(a.dataset.position) - parseInt(b.dataset.position);
+                } else if (sortBy === 'length_desc') {
+                    return parseInt(b.dataset.length) - parseInt(a.dataset.length);
+                } else if (sortBy === 'length_asc') {
+                    return parseInt(a.dataset.length) - parseInt(b.dataset.length);
+                } else if (sortBy === 'doc_count_desc') {
+                    return parseInt(b.dataset.docCount) - parseInt(a.dataset.docCount);
+                }
+                return 0;
+            });
+            
+            // Remove all items
+            items.forEach(item => item.remove());
+            
+            // Add sorted items back
+            items.forEach(item => {
+                paragraphList.appendChild(item);
+            });
+        }
+        
+        // Apply filters function
+        function applyFilters() {
+            const searchText = searchInput.value.toLowerCase();
+            const filterCommon = document.getElementById('filterCommon').checked;
+            const filterWithVars = document.getElementById('filterWithVars').checked;
+            
+            let visibleCount = 0;
+            
+            paragraphItems.forEach(item => {
+                const text = item.querySelector('.paragraph-text').textContent.toLowerCase();
+                const isCommon = item.dataset.isCommon === 'true';
+                const hasVars = item.dataset.hasVars === 'true';
+                
+                // Search filter
+                const matchesSearch = searchText === '' || text.includes(searchText);
+                
+                // Common paragraphs filter
+                const matchesCommon = !filterCommon || isCommon;
+                
+                // Variables filter
+                const matchesVars = !filterWithVars || hasVars;
+                
+                // Apply all filters (AND logic)
+                if (matchesSearch && matchesCommon && matchesVars) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Update paragraph count
+            paragraphCount.textContent = visibleCount;
+        }
+    });
+</script>
+{% endblock %}

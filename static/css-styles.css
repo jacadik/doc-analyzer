@@ -1,0 +1,254 @@
+/* Custom styles for Document Analyzer */
+
+/* Ensure main content stays below fixed navbar */
+body {
+    padding-top: 56px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Custom sidebar styles */
+.sidebar {
+    position: fixed;
+    top: 56px;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.main-content {
+    margin-left: 220px;
+    padding: 20px;
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: static;
+        padding: 20px 0;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+/* Navigation styles */
+.nav-link {
+    font-weight: 500;
+    color: #333;
+}
+
+.nav-link.active {
+    color: #007bff;
+}
+
+.nav-link:hover {
+    color: #0056b3;
+}
+
+/* Card styles */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Badge styles */
+.status-badge {
+    font-size: 85%;
+}
+
+/* Highlight styles */
+.highlight-variable {
+    background-color: #fffacd;
+    padding: 0 3px;
+    border-radius: 3px;
+}
+
+.highlight-duplicate {
+    background-color: #d1e7dd;
+    padding: 0 3px;
+    border-radius: 3px;
+}
+
+.highlight-similar {
+    background-color: #cfe2ff;
+    padding: 0 3px;
+    border-radius: 3px;
+}
+
+/* Footer styles */
+.footer {
+    background-color: #f8f9fa;
+    padding: 20px 0;
+    margin-top: auto;
+}
+
+/* Spinner for background processing */
+.spinner {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Table hover styles */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Make text areas showing document content more readable */
+.document-content {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding: 15px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: #f9f9f9;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* Custom paragraph styling */
+.paragraph-text {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Accordion customization */
+.accordion-button:not(.collapsed) {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}
+
+/* Document text search highlight */
+.search-highlight {
+    background-color: #ffff00;
+}
+
+.search-highlight.active {
+    background-color: #ff9900;
+}
+
+/* Text diff styles */
+.diff-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.diff {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.diff-left {
+    border-left: 4px solid #dc3545;
+}
+
+.diff-right {
+    border-left: 4px solid #28a745;
+}
+
+.diff-same {
+    color: #212529;
+}
+
+.diff-removed {
+    color: #dc3545;
+    background-color: #f8d7da;
+    padding: 0 2px;
+    text-decoration: line-through;
+}
+
+.diff-added {
+    color: #28a745;
+    background-color: #d1e7dd;
+    padding: 0 2px;
+}
+
+/* Custom card stats */
+.stat-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.8;
+}
+
+/* Document list hover effect */
+.document-list .list-group-item-action:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Custom styling for variable chips */
+.variable-chip {
+    background-color: #e9ecef;
+    border-radius: 16px;
+    padding: 4px 12px;
+    margin: 2px;
+    display: inline-block;
+    font-size: 0.85rem;
+}
+
+/* Template analysis styles */
+.template-list .active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.template-detail {
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive improvements */
+@media (max-width: 576px) {
+    .card-title {
+        font-size: 1.1rem;
+    }
+    
+    .h2, h2 {
+        font-size: 1.5rem;
+    }
+    
+    .document-content {
+        font-size: 0.8rem;
+        padding: 10px;
+    }
+}

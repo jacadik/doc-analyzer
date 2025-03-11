@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+
+{% block title %}Variable Analysis - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Variable Analysis</h1>
+        <a href="{{ url_for('export_variable_analysis') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-file-earmark-excel"></i> Export to Excel
+        </a>
+    </div>
+    
+    <div class="row">
+        <!-- Variable Stats and Filters -->
+        <div class="col-md-4 col-lg-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Variable Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">{{ variables|length }}</h3>
+                                    <p class="card-text">Total Variables</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-6 mb-3">
+                            {% set pattern_types = {} %}
+                            {% for var in variables %}
+                                {% if var.pattern_type in pattern_types %}
+                                    {% set _ = pattern_types.update({var.pattern_type: pattern_types[var.pattern_type] + 1}) %}
+                                {% else %}
+                                    {% set _ = pattern_types.update({var.pattern_type: 1}) %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">{{ pattern_types|length }}</h3>
+                                    <p class="card-text">Pattern Types</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if pattern_types %}
+                        <div class="mt-3">
+                            <h6>Pattern Distribution</h6>
+                            <div class="list-group list-group-flush">
+                                {% for type, count in pattern_types.items() %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>{{ type }}</span>
+                                        <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Filter & Sort</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{{ url_for('variables') }}">
+                        <div class="mb-3">
+                            <label for="sort" class="form-label">Sort By</label>
+                            <select id="sort" name="sort" class="form-select">
+                                <option value="document_count" {% if sort_by == 'document_count' %}selected{% endif %}>Document Count</option>
+                                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Variable Name</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="order" class="form-label">Order</label>
+                            <select id="order" name="order" class="form-select">
+                                <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+                                <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                        </div>
+                    </form>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <label for="searchVariable" class="form-label">Quick Search</label>
+                        <input type="text" class="form-control" id="searchVariable" placeholder="Filter by name...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Understanding Variables</h5>
+                </div>
+                <div class="card-body">
+                    <p>Variables are placeholders in document templates where dynamic content is inserted.</p>
+                    
+                    <h6>Common Variable Patterns</h6>
+                    <ul>
+                        <li><code>&lt;&lt;variable&gt;&gt;</code> - Double angle brackets</li>
+                        <li><code>{{variable}}</code> - Double curly braces</li>
+                        <li><code>${variable}</code> - Dollar sign with curly braces</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-lightbulb"></i> <strong>Tip:</strong> Similar variable names with different patterns might indicate inconsistencies in templates.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Variable List -->
+        <div class="col-md-8 col-lg-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Variables</h5>
+                        <span class="badge bg-primary" id="variableCount">{{ variables|length }}</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="variableTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Pattern</th>
+                                    <th scope="col">Full Format</th>
+                                    <th scope="col">Document Count</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if variables %}
+                                    {% for var in variables %}
+                                        <tr class="variable-row">
+                                            <td>{{ var.name }}</td>
+                                            <td>{{ var.pattern_type }}</td>
+                                            <td><code>{{ var.full_name }}</code></td>
+                                            <td>{{ var.document_count }}</td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="varActionDropdown{{ var.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Actions
+                                                    </button>
+                                                    <ul class="dropdown-menu" aria-labelledby="varActionDropdown{{ var.id }}">
+                                                        <li>
+                                                            <button class="dropdown-item view-documents-btn" data-var-id="{{ var.id }}">
+                                                                <i class="bi bi-files me-2"></i> View Documents
+                                                            </button>
+                                                        </li>
+                                                        <li>
+                                                            <button class="dropdown-item find-similar-btn" data-var-name="{{ var.name }}">
+                                                                <i class="bi bi-search me-2"></i> Find Similar
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <p class="mb-0 text-muted">No variables found</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variable Documents Panel -->
+            <div id="variableDocumentsPanel" class="card mt-4" style="display: none;">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Documents with <code id="selectedVariable"></code></h5>
+                        <button type="button" class="btn-close" aria-label="Close" id="closeDocumentsPanel"></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="variableDocumentsList" class="list-group">
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 mb-0">Loading documents...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Similar Variables Panel -->
+            <div id="similarVariablesPanel" class="card mt-4" style="display: none;">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Variables similar to <code id="selectedSimilarVariable"></code></h5>
+                        <button type="button" class="btn-close" aria-label="Close" id="closeSimilarPanel"></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="similarVariablesList" class="list-group">
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 mb-0">Finding similar variables...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Variable quick search
+        const searchInput = document.getElementById('searchVariable');
+        const variableRows = document.querySelectorAll('.variable-row');
+        const variableCount = document.getElementById('variableCount');
+        
+        searchInput.addEventListener('input', function() {
+            const searchText = searchInput.value.toLowerCase();
+            let visibleCount = 0;
+            
+            variableRows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const fullName = row.cells[2].textContent.toLowerCase();
+                
+                if (name.includes(searchText) || fullName.includes(searchText)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            variableCount.textContent = visibleCount;
+        });
+        
+        // View documents with variable
+        const viewDocumentsBtns = document.querySelectorAll('.view-documents-btn');
+        const variableDocumentsPanel = document.getElementById('variableDocumentsPanel');
+        const selectedVariable = document.getElementById('selectedVariable');
+        const variableDocumentsList = document.getElementById('variableDocumentsList');
+        const closeDocumentsPanel = document.getElementById('closeDocumentsPanel');
+        
+        viewDocumentsBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const varId = this.getAttribute('data-var-id');
+                const varName = this.closest('tr').cells[2].textContent;
+                
+                // Show panel and variable name
+                variableDocumentsPanel.style.display = 'block';
+                selectedVariable.textContent = varName;
+                
+                // Scroll to panel
+                variableDocumentsPanel.scrollIntoView({ behavior: 'smooth' });
+                
+                // Simulate loading documents
+                // In a real app, this would be an AJAX call to fetch documents containing the variable
+                setTimeout(() => {
+                    // Mock data - in a real app, this would come from the server
+                    const mockDocuments = [
+                        { id: 1, name: 'Invoice Template.pdf', type: 'pdf', count: 5 },
+                        { id: 2, name: 'Contract Template.docx', type: 'docx', count: 3 },
+                        { id: 3, name: 'Terms and Conditions.pdf', type: 'pdf', count: 2 }
+                    ];
+                    
+                    // Clear loading indicator
+                    variableDocumentsList.innerHTML = '';
+                    
+                    // If no documents, show message
+                    if (mockDocuments.length === 0) {
+                        variableDocumentsList.innerHTML = `
+                            <div class="list-group-item text-center text-muted">
+                                No documents found with this variable
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    // Add documents to the list
+                    mockDocuments.forEach(doc => {
+                        const listItem = document.createElement('a');
+                        listItem.href = `/document/${doc.id}`;
+                        listItem.className = 'list-group-item list-group-item-action';
+                        
+                        listItem.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-file-earmark-${doc.type === 'pdf' ? 'pdf text-danger' : 'word text-primary'} me-2"></i>
+                                    ${doc.name}
+                                </div>
+                                <span class="badge bg-primary rounded-pill">${doc.count} occurrences</span>
+                            </div>
+                        `;
+                        
+                        variableDocumentsList.appendChild(listItem);
+                    });
+                }, 500);
+            });
+        });
+        
+        closeDocumentsPanel.addEventListener('click', function() {
+            variableDocumentsPanel.style.display = 'none';
+        });
+        
+        // Find similar variables
+        const findSimilarBtns = document.querySelectorAll('.find-similar-btn');
+        const similarVariablesPanel = document.getElementById('similarVariablesPanel');
+        const selectedSimilarVariable = document.getElementById('selectedSimilarVariable');
+        const similarVariablesList = document.getElementById('similarVariablesList');
+        const closeSimilarPanel = document.getElementById('closeSimilarPanel');
+        
+        findSimilarBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const varName = this.getAttribute('data-var-name');
+                
+                // Show panel and variable name
+                similarVariablesPanel.style.display = 'block';
+                selectedSimilarVariable.textContent = varName;
+                
+                // Scroll to panel
+                similarVariablesPanel.scrollIntoView({ behavior: 'smooth' });
+                
+                // Function to calculate similarity (Levenshtein distance)
+                function levenshteinDistance(a, b) {
+                    const matrix = [];
+                    
+                    // Initialize matrix
+                    for (let i = 0; i <= b.length; i++) {
+                        matrix[i] = [i];
+                    }
+                    
+                    for (let j = 0; j <= a.length; j++) {
+                        matrix[0][j] = j;
+                    }
+                    
+                    // Fill matrix
+                    for (let i = 1; i <= b.length; i++) {
+                        for (let j = 1; j <= a.length; j++) {
+                            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                                matrix[i][j] = matrix[i - 1][j - 1];
+                            } else {
+                                matrix[i][j] = Math.min(
+                                    matrix[i - 1][j - 1] + 1, // substitution
+                                    matrix[i][j - 1] + 1,     // insertion
+                                    matrix[i - 1][j] + 1      // deletion
+                                );
+                            }
+                        }
+                    }
+                    
+                    return matrix[b.length][a.length];
+                }
+                
+                function calculateSimilarity(str1, str2) {
+                    const maxLength = Math.max(str1.length, str2.length);
+                    if (maxLength === 0) return 1.0; // Both strings are empty
+                    
+                    const distance = levenshteinDistance(str1, str2);
+                    return 1.0 - (distance / maxLength);
+                }
+                
+                // Find similar variables from all rows
+                const similarVariables = [];
+                variableRows.forEach(row => {
+                    const currentVarName = row.cells[0].textContent;
+                    const currentVarPattern = row.cells[1].textContent;
+                    const currentVarFullName = row.cells[2].textContent;
+                    
+                    if (currentVarName !== varName) {
+                        const similarity = calculateSimilarity(currentVarName.toLowerCase(), varName.toLowerCase());
+                        
+                        if (similarity > 0.6) { // Threshold for similarity
+                            similarVariables.push({
+                                name: currentVarName,
+                                pattern: currentVarPattern,
+                                fullName: currentVarFullName,
+                                similarity: similarity
+                            });
+                        }
+                    }
+                });
+                
+                // Sort by similarity (descending)
+                similarVariables.sort((a, b) => b.similarity - a.similarity);
+                
+                // Clear loading indicator and display results
+                similarVariablesList.innerHTML = '';
+                
+                if (similarVariables.length === 0) {
+                    similarVariablesList.innerHTML = `
+                        <div class="list-group-item text-center text-muted">
+                            No similar variables found
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Add similar variables to the list
+                similarVariables.forEach(similar => {
+                    const listItem = document.createElement('div');
+                    listItem.className = 'list-group-item';
+                    
+                    // Format similarity as percentage
+                    const similarityPercent = Math.round(similar.similarity * 100);
+                    
+                    listItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <code>${similar.fullName}</code>
+                                <div class="text-muted small">Pattern: ${similar.pattern}</div>
+                            </div>
+                            <span class="badge bg-info text-dark">${similarityPercent}% similar</span>
+                        </div>
+                    `;
+                    
+                    similarVariablesList.appendChild(listItem);
+                });
+            });
+        });
+        
+        closeSimilarPanel.addEventListener('click', function() {
+            similarVariablesPanel.style.display = 'none';
+        });
+    });
+</script>
+{% endblock %}

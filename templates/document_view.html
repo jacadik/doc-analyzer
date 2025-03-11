@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ document.original_filename }} - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2">Document Details</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('documents') }}">Documents</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ document.original_filename }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="d-flex">
+            <div class="dropdown me-2">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="actionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-gear"></i> Actions
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionDropdown">
+                    {% if document.status == 'processed' %}
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('document_text', doc_id=document.id) }}">
+                                <i class="bi bi-file-text me-2"></i> View Text
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('document_paragraphs', doc_id=document.id) }}">
+                                <i class="bi bi-paragraph me-2"></i> View Paragraphs
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('document_variables', doc_id=document.id) }}">
+                                <i class="bi bi-code-square me-2"></i> View Variables
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('document_analyze', doc_id=document.id) }}">
+                                <i class="bi bi-search me-2"></i> Analyze Content
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('export_document', doc_id=document.id) }}">
+                                <i class="bi bi-file-earmark-excel me-2"></i> Export to Excel
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <button class="dropdown-item text-danger" id="deleteDocumentBtn">
+                            <i class="bi bi-trash me-2"></i> Delete Document
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Document Details -->
+        <div class="col-md-5">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Document Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        {% if document.file_type == 'pdf' %}
+                            <i class="bi bi-file-earmark-pdf text-danger fs-1 me-3"></i>
+                        {% elif document.file_type == 'docx' %}
+                            <i class="bi bi-file-earmark-word text-primary fs-1 me-3"></i>
+                        {% else %}
+                            <i class="bi bi-file-earmark fs-1 me-3"></i>
+                        {% endif %}
+                        <div>
+                            <h4>{{ document.original_filename }}</h4>
+                            <div>
+                                {% if document.status == 'processed' %}
+                                    <span class="badge bg-success">Processed</span>
+                                {% elif document.status == 'processing' %}
+                                    <span class="badge bg-warning">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        Processing
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">Error</span>
+                                {% endif %}
+                                <span class="badge bg-secondary">{{ document.file_type|upper }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">File Size</th>
+                                <td>{{ (document.file_size / 1024)|round(1) }} KB</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Pages</th>
+                                <td>{{ document.page_count }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Paragraphs</th>
+                                <td>{{ document.paragraph_count }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Variables</th>
+                                <td>{{ document.variable_count }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Upload Date</th>
+                                <td>{{ document.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% if document.processing_error %}
+                                <tr>
+                                    <th scope="row">Processing Error</th>
+                                    <td class="text-danger">{{ document.processing_error }}</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Quickly see variables -->
+            {% if document.status == 'processed' and document.variables %}
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Variables</h5>
+                        <a href="{{ url_for('document_variables', doc_id=document.id) }}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for var in document.variables[:15] %}
+                                <span class="badge bg-info text-dark">{{ var.full_name }}</span>
+                            {% endfor %}
+                            {% if document.variables|length > 15 %}
+                                <span class="badge bg-secondary">+{{ document.variables|length - 15 }} more</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Document Preview -->
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="documentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview" type="button" role="tab" aria-controls="preview" aria-selected="true">
+                                Preview
+                            </button>
+                        </li>
+                        {% if document.status == 'processed' %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text" type="button" role="tab" aria-controls="text" aria-selected="false">
+                                    Text
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="structure-tab" data-bs-toggle="tab" data-bs-target="#structure" type="button" role="tab" aria-controls="structure" aria-selected="false">
+                                    Structure
+                                </button>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="documentTabContent">
+                        <!-- Preview Tab -->
+                        <div class="tab-pane fade show active" id="preview" role="tabpanel" aria-labelledby="preview-tab">
+                            {% if document.status == 'processed' %}
+                                <div class="document-content">
+                                    {% set full_text = document.full_text|default('No text content available') %}
+                                    {% set preview_text = full_text[:1000] + ('...' if full_text|length > 1000 else '') %}
+                                    {{ preview_text|replace('\n', '<br>')|safe }}
+                                </div>
+                                {% if document.full_text and document.full_text|length > 1000 %}
+                                    <div class="text-center mt-3">
+                                        <a href="{{ url_for('document_text', doc_id=document.id) }}" class="btn btn-sm btn-outline-primary">
+                                            View Full Text
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            {% elif document.status == 'processing' %}
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary mb-3" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>Document is being processed...</p>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-danger">
+                                    <h5><i class="bi bi-exclamation-triangle"></i> Processing Error</h5>
+                                    <p>{{ document.processing_error }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Text Tab -->
+                        {% if document.status == 'processed' %}
+                            <div class="tab-pane fade" id="text" role="tabpanel" aria-labelledby="text-tab">
+                                <div class="document-content">
+                                    {% set full_text = document.full_text|default('No text content available') %}
+                                    {% for var in document.variables %}
+                                        {% set full_text = full_text|replace(var.full_name, '<span class="highlight-variable">' + var.full_name + '</span>') %}
+                                    {% endfor %}
+                                    {{ full_text|replace('\n', '<br>')|safe }}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Structure Tab -->
+                        {% if document.status == 'processed' and layout %}
+                            <div class="tab-pane fade" id="structure" role="tabpanel" aria-labelledby="structure-tab">
+                                <h5 class="mb-3">Document Structure</h5>
+                                <p>Pages: {{ layout.page_count }}</p>
+                                
+                                <div class="accordion" id="layoutAccordion">
+                                    {% for page in layout.pages %}
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="heading{{ page.page_num }}">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ page.page_num }}" aria-expanded="false" aria-controls="collapse{{ page.page_num }}">
+                                                    Page {{ page.page_num }} ({{ page.blocks|length }} blocks)
+                                                </button>
+                                            </h2>
+                                            <div id="collapse{{ page.page_num }}" class="accordion-collapse collapse" aria-labelledby="heading{{ page.page_num }}" data-bs-parent="#layoutAccordion">
+                                                <div class="accordion-body">
+                                                    <p>Dimensions: {{ page.width|round }} x {{ page.height|round }}</p>
+                                                    <p>Blocks: {{ page.blocks|length }}</p>
+                                                    
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th>Position</th>
+                                                                    <th>Text</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for block in page.blocks %}
+                                                                    <tr>
+                                                                        <td>{{ block.block_num }}</td>
+                                                                        <td>
+                                                                            x: {{ block.x0|round }}-{{ block.x1|round }}<br>
+                                                                            y: {{ block.y0|round }}-{{ block.y1|round }}
+                                                                        </td>
+                                                                        <td>{{ block.text[:100] }}{{ '...' if block.text|length > 100 else '' }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{ document.original_filename }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('delete_document', doc_id=document.id) }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delete document button
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const deleteBtn = document.getElementById('deleteDocumentBtn');
+        
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                deleteModal.show();
+            });
+        }
+        
+        // Auto-refresh if document is processing
+        const isProcessing = {{ 'true' if document.status == 'processing' else 'false' }};
+        if (isProcessing) {
+            setTimeout(function() {
+                window.location.reload();
+            }, 5000); // Refresh every 5 seconds
+        }
+    });
+</script>
+{% endblock %}

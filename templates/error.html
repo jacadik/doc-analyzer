@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card mt-5">
+                <div class="card-body text-center py-5">
+                    {% if title == 'Page Not Found' %}
+                        <i class="bi bi-exclamation-circle text-warning" style="font-size: 5rem;"></i>
+                        <h2 class="mt-4">404 - Page Not Found</h2>
+                        <p class="lead">The page you are looking for does not exist.</p>
+                    {% elif title == 'Server Error' %}
+                        <i class="bi bi-exclamation-triangle text-danger" style="font-size: 5rem;"></i>
+                        <h2 class="mt-4">500 - Server Error</h2>
+                        <p class="lead">Something went wrong on our end. Please try again later.</p>
+                    {% else %}
+                        <i class="bi bi-exclamation-diamond text-danger" style="font-size: 5rem;"></i>
+                        <h2 class="mt-4">{{ title }}</h2>
+                        <p class="lead">An error has occurred.</p>
+                    {% endif %}
+                    
+                    {% if error %}
+                        <div class="alert alert-danger mt-4">
+                            <p class="mb-0">{{ error }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="bi bi-house"></i> Go to Dashboard
+                        </a>
+                        <button class="btn btn-outline-secondary ms-2" onclick="window.history.back();">
+                            <i class="bi bi-arrow-left"></i> Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p>If you continue to experience issues, try the following:</p>
+                    <ul>
+                        <li>Check if your document format is supported (PDF, DOCX)</li>
+                        <li>Verify that the file is not corrupted</li>
+                        <li>Check the application logs for detailed error information</li>
+                        <li>Restart the application if necessary</li>
+                    </ul>
+                    
+                    <p class="mb-0 text-muted">
+                        <i class="bi bi-info-circle"></i> Log files are located in the <code>logs</code> directory.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

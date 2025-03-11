@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+
+{% block title %}Variables - {{ document.original_filename }} - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2">Document Variables</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('documents') }}">Documents</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('document_view', doc_id=document.id) }}">{{ document.original_filename }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Variables</li>
+                </ol>
+            </nav>
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('document_view', doc_id=document.id) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Document
+            </a>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-gear"></i> Options
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_text', doc_id=document.id) }}">
+                            <i class="bi bi-file-text me-2"></i> View Text
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_paragraphs', doc_id=document.id) }}">
+                            <i class="bi bi-paragraph me-2"></i> View Paragraphs
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_analyze', doc_id=document.id) }}">
+                            <i class="bi bi-search me-2"></i> Analyze Content
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('export_document', doc_id=document.id) }}">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Export to Excel
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Variable Stats and Filter -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Variable Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">{{ variables|length }}</h3>
+                                    <p class="card-text">Total Variables</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    {% set pattern_types = {} %}
+                                    {% for var in variables %}
+                                        {% if var.pattern_type in pattern_types %}
+                                            {% set _ = pattern_types.update({var.pattern_type: pattern_types[var.pattern_type] + 1}) %}
+                                        {% else %}
+                                            {% set _ = pattern_types.update({var.pattern_type: 1}) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% set most_common_type = '' %}
+                                    {% set most_common_count = 0 %}
+                                    {% for type, count in pattern_types.items() %}
+                                        {% if count > most_common_count %}
+                                            {% set most_common_type = type %}
+                                            {% set most_common_count = count %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    <h3 class="mb-0">{{ most_common_type }}</h3>
+                                    <p class="card-text">Common Pattern</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-3">Pattern Distribution</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for type, count in pattern_types.items() %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ type }}
+                                <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Filter Options -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Filter Options</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="searchVariable" class="form-label">Search Variables</label>
+                        <input type="text" class="form-control" id="searchVariable" placeholder="Type to search...">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="filterPattern" class="form-label">Filter by Pattern</label>
+                        <select class="form-select" id="filterPattern">
+                            <option value="all">All Patterns</option>
+                            {% for type in pattern_types %}
+                                <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="sortVariable" class="form-label">Sort By</label>
+                        <select class="form-select" id="sortVariable">
+                            <option value="name_asc">Name (A-Z)</option>
+                            <option value="name_desc">Name (Z-A)</option>
+                            <option value="doc_count_desc">Document Count (Highest First)</option>
+                            <option value="doc_count_asc">Document Count (Lowest First)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variable Tips -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Variable Usage</h5>
+                </div>
+                <div class="card-body">
+                    <p>Found <strong>{{ variables|length }}</strong> variables in this document. Variables are placeholders where dynamic content gets inserted.</p>
+                    
+                    <h6>Common Variable Patterns</h6>
+                    <ul>
+                        <li><code>&lt;&lt;variable&gt;&gt;</code> - Double angle brackets</li>
+                        <li><code>{{variable}}</code> - Double curly braces</li>
+                        <li><code>${variable}</code> - Dollar sign with curly braces</li>
+                    </ul>
+                    
+                    <p class="text-muted small">Variables with the same name but different patterns are treated as distinct variables.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Variable List -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Variables</h5>
+                        <span class="badge bg-primary" id="variableCount">{{ variables|length }}</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="variableTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Pattern</th>
+                                    <th scope="col">Full Format</th>
+                                    <th scope="col">Doc Count</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if variables %}
+                                    {% for var in variables %}
+                                        <tr class="variable-row" data-name="{{ var.name }}" data-pattern="{{ var.pattern_type }}" data-doc-count="{{ var.document_count }}">
+                                            <td>{{ var.name }}</td>
+                                            <td>{{ var.pattern_type }}</td>
+                                            <td><code>{{ var.full_name }}</code></td>
+                                            <td>{{ var.document_count }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary find-var-btn" data-var="{{ var.full_name }}">
+                                                    <i class="bi bi-search"></i> Find
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <p class="mb-0 text-muted">No variables found in document</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variable Occurrences -->
+            <div id="variableOccurrences" class="card mt-4" style="display: none;">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Occurrences of <code id="selectedVariable"></code></h5>
+                        <button type="button" class="btn-close" id="closeOccurrences" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="occurrencesList" class="list-group">
+                        <!-- Occurrences will be loaded here via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const variableRows = document.querySelectorAll('.variable-row');
+        const searchInput = document.getElementById('searchVariable');
+        const filterPattern = document.getElementById('filterPattern');
+        const sortVariable = document.getElementById('sortVariable');
+        const variableCount = document.getElementById('variableCount');
+        const variableTable = document.getElementById('variableTable');
+        const findVarBtns = document.querySelectorAll('.find-var-btn');
+        const variableOccurrences = document.getElementById('variableOccurrences');
+        const selectedVariable = document.getElementById('selectedVariable');
+        const occurrencesList = document.getElementById('occurrencesList');
+        const closeOccurrences = document.getElementById('closeOccurrences');
+        
+        // Search and filter functionality
+        function applyFilters() {
+            const searchText = searchInput.value.toLowerCase();
+            const patternFilter = filterPattern.value;
+            
+            let visibleCount = 0;
+            
+            variableRows.forEach(row => {
+                const name = row.dataset.name.toLowerCase();
+                const pattern = row.dataset.pattern;
+                
+                // Apply search filter
+                const matchesSearch = name.includes(searchText);
+                
+                // Apply pattern filter
+                const matchesPattern = patternFilter === 'all' || pattern === patternFilter;
+                
+                // Show/hide row
+                if (matchesSearch && matchesPattern) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Update count
+            variableCount.textContent = visibleCount;
+        }
+        
+        // Sort functionality
+        function applySort() {
+            const sortBy = sortVariable.value;
+            const tbody = variableTable.querySelector('tbody');
+            const rows = Array.from(variableRows);
+            
+            rows.sort((a, b) => {
+                if (sortBy === 'name_asc') {
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                } else if (sortBy === 'name_desc') {
+                    return b.dataset.name.localeCompare(a.dataset.name);
+                } else if (sortBy === 'doc_count_desc') {
+                    return parseInt(b.dataset.docCount) - parseInt(a.dataset.docCount);
+                } else if (sortBy === 'doc_count_asc') {
+                    return parseInt(a.dataset.docCount) - parseInt(b.dataset.docCount);
+                }
+                return 0;
+            });
+            
+            // Remove all rows
+            rows.forEach(row => row.remove());
+            
+            // Add sorted rows back
+            rows.forEach(row => {
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Event listeners for search and filters
+        searchInput.addEventListener('input', applyFilters);
+        filterPattern.addEventListener('change', applyFilters);
+        
+        // Event listener for sort
+        sortVariable.addEventListener('change', function() {
+            applySort();
+            applyFilters();
+        });
+        
+        // Find variable occurrences
+        findVarBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const varName = this.getAttribute('data-var');
+                
+                // Set selected variable name
+                selectedVariable.textContent = varName;
+                
+                // Show occurrences panel
+                variableOccurrences.style.display = 'block';
+                
+                // Get full text content from document and find occurrences
+                const documentText = `{{ document.full_text|replace('\n', ' ')|replace("'", "\\'")|replace('"', '\\"')|safe }}`;
+                
+                // Split into paragraphs
+                const paragraphs = documentText.split(/\n\s*\n/);
+                
+                // Find paragraphs containing the variable
+                const matchingParagraphs = [];
+                paragraphs.forEach((para, index) => {
+                    if (para.includes(varName)) {
+                        matchingParagraphs.push({
+                            index: index + 1,
+                            text: para
+                        });
+                    }
+                });
+                
+                // Display occurrences
+                occurrencesList.innerHTML = '';
+                
+                if (matchingParagraphs.length > 0) {
+                    matchingParagraphs.forEach(para => {
+                        // Highlight variable in paragraph
+                        const regex = new RegExp(escapeRegExp(varName), 'g');
+                        const highlightedText = para.text.replace(regex, `<span class="highlight-variable">${varName}</span>`);
+                        
+                        // Create list item
+                        const listItem = document.createElement('div');
+                        listItem.className = 'list-group-item';
+                        listItem.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-secondary">Paragraph #${para.index}</span>
+                            </div>
+                            <div>${highlightedText}</div>
+                        `;
+                        
+                        occurrencesList.appendChild(listItem);
+                    });
+                } else {
+                    occurrencesList.innerHTML = `
+                        <div class="list-group-item text-center text-muted">
+                            No occurrences found
+                        </div>
+                    `;
+                }
+                
+                // Scroll to occurrences panel
+                variableOccurrences.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        
+        // Close occurrences panel
+        closeOccurrences.addEventListener('click', function() {
+            variableOccurrences.style.display = 'none';
+        });
+        
+        // Helper function to escape special regex characters
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        // Apply initial sort
+        applySort();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}Documents - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Document List</h1>
+        <div>
+            <a href="{{ url_for('upload') }}" class="btn btn-primary">
+                <i class="bi bi-upload"></i> Upload New
+            </a>
+            <a href="{{ url_for('export_documents') }}" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-file-earmark-excel"></i> Export to Excel
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title">Filters</h5>
+        </div>
+        <div class="card-body">
+            <form id="filterForm" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="type" class="form-label">File Type</label>
+                    <select id="type" name="type" class="form-select">
+                        <option value="all" {% if filter_type == 'all' %}selected{% endif %}>All Types</option>
+                        <option value="pdf" {% if filter_type == 'pdf' %}selected{% endif %}>PDF</option>
+                        <option value="docx" {% if filter_type == 'docx' %}selected{% endif %}>Word</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="all" {% if filter_status == 'all' %}selected{% endif %}>All Statuses</option>
+                        <option value="processed" {% if filter_status == 'processed' %}selected{% endif %}>Processed</option>
+                        <option value="processing" {% if filter_status == 'processing' %}selected{% endif %}>Processing</option>
+                        <option value="error" {% if filter_status == 'error' %}selected{% endif %}>Error</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="sort" class="form-label">Sort By</label>
+                    <div class="input-group">
+                        <select id="sort" name="sort" class="form-select">
+                            <option value="upload_date" {% if sort_by == 'upload_date' %}selected{% endif %}>Upload Date</option>
+                            <option value="filename" {% if sort_by == 'filename' %}selected{% endif %}>Filename</option>
+                            <option value="file_size" {% if sort_by == 'file_size' %}selected{% endif %}>File Size</option>
+                            <option value="page_count" {% if sort_by == 'page_count' %}selected{% endif %}>Page Count</option>
+                        </select>
+                        <select id="order" name="order" class="form-select">
+                            <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+                            <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Document List -->
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Documents ({{ documents|length }})</h5>
+                <input type="text" id="documentSearch" class="form-control form-control-sm" style="width: 250px;" placeholder="Search documents...">
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">File Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Size</th>
+                            <th scope="col">Pages</th>
+                            <th scope="col">Paragraphs</th>
+                            <th scope="col">Variables</th>
+                            <th scope="col">Uploaded On</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if documents %}
+                            {% for doc in documents %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if doc.file_type == 'pdf' %}
+                                                <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                            {% elif doc.file_type == 'docx' %}
+                                                <i class="bi bi-file-earmark-word text-primary me-2"></i>
+                                            {% else %}
+                                                <i class="bi bi-file-earmark me-2"></i>
+                                            {% endif %}
+                                            <a href="{{ url_for('document_view', doc_id=doc.id) }}">
+                                                {{ doc.original_filename }}
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td>{{ doc.file_type|upper }}</td>
+                                    <td>{{ (doc.file_size / 1024)|round(1) }} KB</td>
+                                    <td>{{ doc.page_count }}</td>
+                                    <td>{{ doc.paragraph_count }}</td>
+                                    <td>{{ doc.variable_count }}</td>
+                                    <td>{{ doc.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        {% if doc.status == 'processed' %}
+                                            <span class="badge bg-success">Processed</span>
+                                        {% elif doc.status == 'processing' %}
+                                            <span class="badge bg-warning">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Processing
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Error</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="actionDropdown-{{ doc.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="actionDropdown-{{ doc.id }}">
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('document_view', doc_id=doc.id) }}">
+                                                        <i class="bi bi-eye me-2"></i> View
+                                                    </a>
+                                                </li>
+                                                {% if doc.status == 'processed' %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('document_text', doc_id=doc.id) }}">
+                                                            <i class="bi bi-file-text me-2"></i> View Text
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('document_paragraphs', doc_id=doc.id) }}">
+                                                            <i class="bi bi-paragraph me-2"></i> View Paragraphs
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('document_variables', doc_id=doc.id) }}">
+                                                            <i class="bi bi-code-square me-2"></i> View Variables
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('document_analyze', doc_id=doc.id) }}">
+                                                            <i class="bi bi-search me-2"></i> Analyze Content
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('export_document', doc_id=doc.id) }}">
+                                                            <i class="bi bi-file-earmark-excel me-2"></i> Export to Excel
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <button class="dropdown-item text-danger delete-document" data-doc-id="{{ doc.id }}" data-doc-name="{{ doc.original_filename }}">
+                                                        <i class="bi bi-trash me-2"></i> Delete
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="9" class="text-center py-4">
+                                    <p class="mb-0 text-muted">No documents found</p>
+                                    <a href="{{ url_for('upload') }}" class="btn btn-primary mt-2">Upload Document</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the document <strong id="deleteDocName"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter form auto-submit
+        const filterForm = document.getElementById('filterForm');
+        const selectInputs = filterForm.querySelectorAll('select');
+        
+        selectInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                if (input.id !== 'order') {
+                    filterForm.submit();
+                }
+            });
+        });
+        
+        // Document search
+        const documentSearch = document.getElementById('documentSearch');
+        const documentRows = document.querySelectorAll('table tbody tr');
+        
+        documentSearch.addEventListener('input', function() {
+            const searchTerm = documentSearch.value.toLowerCase();
+            
+            documentRows.forEach(row => {
+                const fileName = row.querySelector('td:first-child').textContent.toLowerCase();
+                if (fileName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        // Delete document
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const deleteButtons = document.querySelectorAll('.delete-document');
+        const deleteForm = document.getElementById('deleteForm');
+        const deleteDocName = document.getElementById('deleteDocName');
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const docId = this.getAttribute('data-doc-id');
+                const docName = this.getAttribute('data-doc-name');
+                
+                deleteForm.action = `/delete/document/${docId}`;
+                deleteDocName.textContent = docName;
+                deleteModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %}

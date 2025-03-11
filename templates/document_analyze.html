@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+
+{% block title %}Content Analysis - {{ document.original_filename }} - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2">Content Analysis</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('documents') }}">Documents</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('document_view', doc_id=document.id) }}">{{ document.original_filename }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Content Analysis</li>
+                </ol>
+            </nav>
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('document_view', doc_id=document.id) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Document
+            </a>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-gear"></i> Options
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_text', doc_id=document.id) }}">
+                            <i class="bi bi-file-text me-2"></i> View Text
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_paragraphs', doc_id=document.id) }}">
+                            <i class="bi bi-paragraph me-2"></i> View Paragraphs
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_variables', doc_id=document.id) }}">
+                            <i class="bi bi-code-square me-2"></i> View Variables
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('export_document', doc_id=document.id) }}">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Export to Excel
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Analysis Options -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Analysis Options</h5>
+                </div>
+                <div class="card-body">
+                    <form id="analysisOptionsForm" method="get" action="{{ url_for('document_analyze', doc_id=document.id) }}">
+                        <div class="mb-3">
+                            <label for="threshold" class="form-label">Similarity Threshold</label>
+                            <div class="input-group">
+                                <input type="range" class="form-range" id="thresholdRange" min="0.5" max="1" step="0.05" value="{{ threshold }}">
+                                <input type="number" class="form-control ms-2" id="thresholdInput" name="threshold" min="0.5" max="1" step="0.05" value="{{ threshold }}" style="width: 80px;">
+                            </div>
+                            <div class="form-text">
+                                Higher values require more similarity between paragraphs.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-arrow-repeat"></i> Reanalyze
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Analysis Tips -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Analysis Guide</h5>
+                </div>
+                <div class="card-body">
+                    <h6><i class="bi bi-info-circle text-primary"></i> Understanding the Analysis</h6>
+                    <ul>
+                        <li><strong>Duplicate Paragraphs</strong> - Identical paragraphs that appear multiple times within this document.</li>
+                        <li><strong>Similar Paragraphs</strong> - Paragraphs that are not identical but have similar content above the threshold.</li>
+                        <li><strong>Common Phrases</strong> - Recurring text fragments that appear throughout the document.</li>
+                    </ul>
+                    
+                    <h6><i class="bi bi-lightbulb text-warning"></i> Tips</h6>
+                    <ul>
+                        <li>Lower the threshold to find more similar paragraphs with minor differences.</li>
+                        <li>Look for patterns in the similar content to identify template structures.</li>
+                        <li>Pay attention to common phrases that might indicate standardized language.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analysis Results -->
+        <div class="col-md-8">
+            <!-- Duplicate Paragraphs -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        Duplicate Paragraphs 
+                        <span class="badge bg-primary">{{ duplicate_groups|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if duplicate_groups %}
+                        <div class="accordion" id="duplicateAccordion">
+                            {% for hash, paragraphs in duplicate_groups.items() %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="duplicateHeading{{ loop.index }}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#duplicateCollapse{{ loop.index }}" aria-expanded="false" aria-controls="duplicateCollapse{{ loop.index }}">
+                                            Duplicate Group #{{ loop.index }} ({{ paragraphs|length }} occurrences)
+                                        </button>
+                                    </h2>
+                                    <div id="duplicateCollapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="duplicateHeading{{ loop.index }}" data-bs-parent="#duplicateAccordion">
+                                        <div class="accordion-body">
+                                            <p class="highlight-duplicate">{{ paragraphs[0].text }}</p>
+                                            
+                                            <hr>
+                                            
+                                            <h6>Occurrences:</h6>
+                                            <ul class="list-group list-group-flush">
+                                                {% for para in paragraphs %}
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Position #{{ para.id }}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No duplicate paragraphs found in this document.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Similar Paragraphs -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        Similar Paragraphs 
+                        <span class="badge bg-primary">{{ similar_pairs|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if similar_pairs %}
+                        <div class="accordion" id="similarAccordion">
+                            {% for pair in similar_pairs %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="similarHeading{{ loop.index }}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#similarCollapse{{ loop.index }}" aria-expanded="false" aria-controls="similarCollapse{{ loop.index }}">
+                                            Similar Pair #{{ loop.index }} ({{ (pair.similarity * 100)|round }}% similar)
+                                        </button>
+                                    </h2>
+                                    <div id="similarCollapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="similarHeading{{ loop.index }}" data-bs-parent="#similarAccordion">
+                                        <div class="accordion-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>Paragraph #{{ pair.para1.id }}</h6>
+                                                    <div class="highlight-similar p-2">{{ pair.para1.text }}</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>Paragraph #{{ pair.para2.id }}</h6>
+                                                    <div class="highlight-similar p-2">{{ pair.para2.text }}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-3">
+                                                <button class="btn btn-sm btn-outline-primary compare-btn" 
+                                                        data-text1="{{ pair.para1.text|replace('\n', ' ')|replace('"', '&quot;') }}" 
+                                                        data-text2="{{ pair.para2.text|replace('\n', ' ')|replace('"', '&quot;') }}">
+                                                    <i class="bi bi-arrows"></i> Compare Differences
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="diff-result mt-3" style="display: none;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No similar paragraphs found with the current threshold ({{ threshold }}). Try lowering the threshold to find more similar content.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Common Phrases -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        Common Phrases 
+                        <span class="badge bg-primary">{{ common_phrases|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if common_phrases %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Phrase</th>
+                                        <th scope="col">Occurrences</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for phrase, count in common_phrases %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ phrase }}</td>
+                                            <td>{{ count }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No common phrases found in this document.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Comparison Modal -->
+<div class="modal fade" id="comparisonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Paragraph Comparison</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="diffResult"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sync the threshold range and input
+        const thresholdRange = document.getElementById('thresholdRange');
+        const thresholdInput = document.getElementById('thresholdInput');
+        
+        thresholdRange.addEventListener('input', function() {
+            thresholdInput.value = thresholdRange.value;
+        });
+        
+        thresholdInput.addEventListener('input', function() {
+            thresholdRange.value = thresholdInput.value;
+        });
+        
+        // Compare text differences
+        const compareButtons = document.querySelectorAll('.compare-btn');
+        const comparisonModal = new bootstrap.Modal(document.getElementById('comparisonModal'));
+        const diffResult = document.getElementById('diffResult');
+        
+        compareButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const text1 = this.getAttribute('data-text1');
+                const text2 = this.getAttribute('data-text2');
+                
+                // Find the diff result container for this comparison
+                const diffContainer = this.closest('.accordion-body').querySelector('.diff-result');
+                
+                // Show differences in the container
+                const diffHtml = findDifferences(text1, text2);
+                diffContainer.innerHTML = diffHtml;
+                diffContainer.style.display = 'block';
+                
+                // Also show in modal
+                diffResult.innerHTML = diffHtml;
+                comparisonModal.show();
+            });
+        });
+        
+        // Function to find text differences (simplified diff)
+        function findDifferences(text1, text2) {
+            // Split into words (very simple approach)
+            const words1 = text1.split(/\s+/);
+            const words2 = text2.split(/\s+/);
+            
+            // Find the longest common subsequence (naive implementation)
+            const lcs = longestCommonSubsequence(words1, words2);
+            
+            // Highlight differences
+            let html = '<div class="diff-container"><div class="diff diff-left">';
+            
+            // First text
+            let i = 0, j = 0;
+            for (let k = 0; k < words1.length; k++) {
+                if (i < lcs.length && k === lcs[i][0]) {
+                    html += '<span class="diff-same">' + escapeHtml(words1[k]) + '</span> ';
+                    i++;
+                } else {
+                    html += '<span class="diff-removed">' + escapeHtml(words1[k]) + '</span> ';
+                }
+            }
+            
+            html += '</div><div class="diff diff-right">';
+            
+            // Second text
+            for (let k = 0; k < words2.length; k++) {
+                if (j < lcs.length && k === lcs[j][1]) {
+                    html += '<span class="diff-same">' + escapeHtml(words2[k]) + '</span> ';
+                    j++;
+                } else {
+                    html += '<span class="diff-added">' + escapeHtml(words2[k]) + '</span> ';
+                }
+            }
+            
+            html += '</div></div>';
+            
+            // Add styles
+            html += `
+                <style>
+                    .diff-container {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1rem;
+                    }
+                    .diff {
+                        padding: 1rem;
+                        background-color: #f8f9fa;
+                        border-radius: 0.25rem;
+                        white-space: pre-wrap;
+                        word-wrap: break-word;
+                    }
+                    .diff-left {
+                        border-left: 4px solid #dc3545;
+                    }
+                    .diff-right {
+                        border-left: 4px solid #28a745;
+                    }
+                    .diff-same {
+                        color: #212529;
+                    }
+                    .diff-removed {
+                        color: #dc3545;
+                        background-color: #f8d7da;
+                        padding: 0 2px;
+                        text-decoration: line-through;
+                    }
+                    .diff-added {
+                        color: #28a745;
+                        background-color: #d1e7dd;
+                        padding: 0 2px;
+                    }
+                </style>
+            `;
+            
+            return html;
+        }
+        
+        // Longest common subsequence algorithm
+        function longestCommonSubsequence(arr1, arr2) {
+            const m = arr1.length;
+            const n = arr2.length;
+            const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
+            
+            // Build LCS matrix
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (arr1[i - 1] === arr2[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+            }
+            
+            // Reconstruct the LCS
+            const lcs = [];
+            let i = m, j = n;
+            
+            while (i > 0 && j > 0) {
+                if (arr1[i - 1] === arr2[j - 1]) {
+                    lcs.unshift([i - 1, j - 1]); // Store indexes from both arrays
+                    i--;
+                    j--;
+                } else if (dp[i - 1][j] > dp[i][j - 1]) {
+                    i--;
+                } else {
+                    j--;
+                }
+            }
+            
+            return lcs;
+        }
+        
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    });
+</script>
+{% endblock %}

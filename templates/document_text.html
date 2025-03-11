@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}Text - {{ document.original_filename }} - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2">Document Text</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('documents') }}">Documents</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('document_view', doc_id=document.id) }}">{{ document.original_filename }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Text</li>
+                </ol>
+            </nav>
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('document_view', doc_id=document.id) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Document
+            </a>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-gear"></i> Options
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_paragraphs', doc_id=document.id) }}">
+                            <i class="bi bi-paragraph me-2"></i> View Paragraphs
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_variables', doc_id=document.id) }}">
+                            <i class="bi bi-code-square me-2"></i> View Variables
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('document_analyze', doc_id=document.id) }}">
+                            <i class="bi bi-search me-2"></i> Analyze Content
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('export_document', doc_id=document.id) }}">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Export to Excel
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Document Info Sidebar -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Document Info</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        {% if document.file_type == 'pdf' %}
+                            <i class="bi bi-file-earmark-pdf text-danger fs-1 me-3"></i>
+                        {% elif document.file_type == 'docx' %}
+                            <i class="bi bi-file-earmark-word text-primary fs-1 me-3"></i>
+                        {% else %}
+                            <i class="bi bi-file-earmark fs-1 me-3"></i>
+                        {% endif %}
+                        <div>
+                            <h6 class="mb-0">{{ document.original_filename }}</h6>
+                            <span class="badge bg-secondary">{{ document.file_type|upper }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Pages</span>
+                            <span class="badge bg-primary rounded-pill">{{ document.page_count }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Paragraphs</span>
+                            <span class="badge bg-primary rounded-pill">{{ document.paragraph_count }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Variables</span>
+                            <span class="badge bg-primary rounded-pill">{{ document.variable_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Display Options -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Display Options</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="highlightVariables" checked>
+                        <label class="form-check-label" for="highlightVariables">Highlight Variables</label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="fontSizeRange" class="form-label">Font Size</label>
+                        <input type="range" class="form-range" min="80" max="130" value="100" id="fontSizeRange">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="lineHeightRange" class="form-label">Line Height</label>
+                        <input type="range" class="form-range" min="100" max="200" value="150" id="lineHeightRange">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Document Text Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Full Text</h5>
+                        <div class="input-group" style="width: 250px;">
+                            <input type="text" id="searchText" class="form-control" placeholder="Search in text...">
+                            <button class="btn btn-outline-secondary" type="button" id="searchNext">
+                                <i class="bi bi-arrow-down"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="searchPrev">
+                                <i class="bi bi-arrow-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="textContent" class="document-content">
+                        {% if document.full_text %}
+                            {% set full_text = document.full_text %}
+                            {% for var in document.variables %}
+                                {% set full_text = full_text|replace(var.full_name, '<span class="highlight-variable">' + var.full_name + '</span>') %}
+                            {% endfor %}
+                            {{ full_text|replace('\n', '<br>')|safe }}
+                        {% else %}
+                            <p class="text-center text-muted">No text content available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Display Options
+        const textContent = document.getElementById('textContent');
+        const highlightVariables = document.getElementById('highlightVariables');
+        const fontSizeRange = document.getElementById('fontSizeRange');
+        const lineHeightRange = document.getElementById('lineHeightRange');
+        
+        // Highlight variables toggle
+        highlightVariables.addEventListener('change', function() {
+            const variables = textContent.querySelectorAll('.highlight-variable');
+            variables.forEach(variable => {
+                if (highlightVariables.checked) {
+                    variable.classList.add('highlight-variable');
+                } else {
+                    variable.classList.remove('highlight-variable');
+                }
+            });
+        });
+        
+        // Font size adjustment
+        fontSizeRange.addEventListener('input', function() {
+            const fontSize = fontSizeRange.value;
+            textContent.style.fontSize = `${fontSize}%`;
+        });
+        
+        // Line height adjustment
+        lineHeightRange.addEventListener('input', function() {
+            const lineHeight = lineHeightRange.value / 100;
+            textContent.style.lineHeight = lineHeight;
+        });
+        
+        // Text search functionality
+        const searchText = document.getElementById('searchText');
+        const searchNext = document.getElementById('searchNext');
+        const searchPrev = document.getElementById('searchPrev');
+        let currentSearchPosition = -1;
+        let searchResults = [];
+        
+        function performSearch() {
+            // Remove existing highlights
+            const existingHighlights = textContent.querySelectorAll('.search-highlight');
+            existingHighlights.forEach(highlight => {
+                const parent = highlight.parentNode;
+                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+            });
+            
+            // Reset search position and results
+            currentSearchPosition = -1;
+            searchResults = [];
+            
+            const searchTerm = searchText.value.trim();
+            if (!searchTerm) return;
+            
+            // Create a tree walker to search for text nodes
+            const walker = document.createTreeWalker(textContent, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+            
+            while (node = walker.nextNode()) {
+                const content = node.textContent;
+                let index = content.toLowerCase().indexOf(searchTerm.toLowerCase());
+                
+                while (index !== -1) {
+                    // Save reference to this match
+                    searchResults.push({
+                        node: node,
+                        startIndex: index,
+                        endIndex: index + searchTerm.length
+                    });
+                    
+                    // Look for next match
+                    index = content.toLowerCase().indexOf(searchTerm.toLowerCase(), index + 1);
+                }
+            }
+            
+            // Highlight all matches
+            highlightSearchResults();
+        }
+        
+        function highlightSearchResults() {
+            if (searchResults.length === 0) return;
+            
+            // Create new text nodes and highlights
+            const highlightedNodes = new Map();
+            
+            for (let i = 0; i < searchResults.length; i++) {
+                const result = searchResults[i];
+                let node = result.node;
+                
+                // Check if this node has already been processed
+                if (highlightedNodes.has(node)) {
+                    node = highlightedNodes.get(node);
+                    continue;
+                }
+                
+                const content = node.textContent;
+                const parent = node.parentNode;
+                
+                // Create document fragment to hold the new nodes
+                const fragment = document.createDocumentFragment();
+                let lastIndex = 0;
+                
+                // Find all matches in this node
+                const matches = searchResults.filter(r => r.node === result.node)
+                    .sort((a, b) => a.startIndex - b.startIndex);
+                
+                for (const match of matches) {
+                    // Text before match
+                    if (match.startIndex > lastIndex) {
+                        fragment.appendChild(document.createTextNode(content.substring(lastIndex, match.startIndex)));
+                    }
+                    
+                    // Highlighted match
+                    const highlightSpan = document.createElement('span');
+                    highlightSpan.classList.add('search-highlight');
+                    highlightSpan.style.backgroundColor = '#ffff00';
+                    highlightSpan.textContent = content.substring(match.startIndex, match.endIndex);
+                    fragment.appendChild(highlightSpan);
+                    
+                    lastIndex = match.endIndex;
+                }
+                
+                // Text after last match
+                if (lastIndex < content.length) {
+                    fragment.appendChild(document.createTextNode(content.substring(lastIndex)));
+                }
+                
+                // Replace original node with fragment
+                parent.replaceChild(fragment, node);
+                
+                // Mark this node as processed
+                highlightedNodes.set(node, fragment);
+            }
+            
+            // Set current position to first result
+            currentSearchPosition = 0;
+            navigateToCurrentResult();
+        }
+        
+        function navigateToCurrentResult() {
+            if (searchResults.length === 0 || currentSearchPosition < 0) return;
+            
+            // Get all highlight spans
+            const highlights = textContent.querySelectorAll('.search-highlight');
+            
+            // Remove active class from all highlights
+            highlights.forEach(h => h.style.backgroundColor = '#ffff00');
+            
+            // Add active class to current highlight
+            const currentHighlight = highlights[currentSearchPosition];
+            currentHighlight.style.backgroundColor = '#ff9900';
+            
+            // Scroll to the current highlight
+            currentHighlight.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+        
+        // Search events
+        searchText.addEventListener('input', performSearch);
+        
+        searchNext.addEventListener('click', function() {
+            if (searchResults.length === 0) return;
+            
+            currentSearchPosition = (currentSearchPosition + 1) % searchResults.length;
+            navigateToCurrentResult();
+        });
+        
+        searchPrev.addEventListener('click', function() {
+            if (searchResults.length === 0) return;
+            
+            currentSearchPosition = (currentSearchPosition - 1 + searchResults.length) % searchResults.length;
+            navigateToCurrentResult();
+        });
+        
+        // Add custom styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .search-highlight {
+                background-color: #ffff00;
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}Paragraph Analysis - Document Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Paragraph Analysis</h1>
+        <a href="{{ url_for('export_documents') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-file-earmark-excel"></i> Export to Excel
+        </a>
+    </div>
+    
+    <div class="row">
+        <!-- Filters -->
+        <div class="col-md-4 col-lg-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Filter Options</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{{ url_for('paragraphs') }}" id="filterForm">
+                        <div class="mb-3">
+                            <label for="min_docs" class="form-label">Minimum Documents</label>
+                            <div class="input-group">
+                                <input type="range" class="form-range" id="min_docs_range" min="1" max="10" value="{{ min_docs }}" style="width: 70%;">
+                                <input type="number" id="min_docs" name="min_docs" class="form-control ms-2" min="1" max="10" value="{{ min_docs }}" style="width: 30%;">
+                            </div>
+                            <div class="form-text">
+                                Only show paragraphs that appear in at least this many documents.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="sort" class="form-label">Sort By</label>
+                            <select id="sort" name="sort" class="form-select">
+                                <option value="document_count" {% if sort_by == 'document_count' %}selected{% endif %}>Document Count</option>
+                                <option value="length" {% if sort_by == 'length' %}selected{% endif %}>Paragraph Length</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="order" class="form-label">Order</label>
+                            <select id="order" name="order" class="form-select">
+                                <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+                                <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">Quick Search</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="searchParagraph" class="form-label">Search in Paragraphs</label>
+                        <input type="text" class="form-control" id="searchParagraph" placeholder="Type to search...">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="exactMatch">
+                            <label class="form-check-label" for="exactMatch">Exact Match</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Understanding Paragraphs</h5>
+                </div>
+                <div class="card-body">
+                    <p>This view shows paragraphs that appear across multiple documents. These are likely to be:</p>
+                    <ul>
+                        <li><strong>Boilerplate Text</strong> - Standard paragraphs used across templates</li>
+                        <li><strong>Legal Disclaimers</strong> - Terms, conditions, and policies</li>
+                        <li><strong>Common Sections</strong> - Headers, footers, or other recurring content</li>
+                    </ul>
+                    <p class="text-muted small">Paragraphs are matched by exact content. For similar paragraphs, use the document comparison tools.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Paragraph List -->
+        <div class="col-md-8 col-lg-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Common Paragraphs</h5>
+                        <span class="badge bg-primary" id="paragraphCount">{{ paragraphs|length }}</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if paragraphs %}
+                        <div class="list-group list-group-flush paragraph-items">
+                            {% for para in paragraphs %}
+                                <div class="list-group-item paragraph-item">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge bg-primary rounded-pill">
+                                            {{ para.document_count }} documents
+                                        </span>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary show-documents-btn" data-para-id="{{ para.id }}">
+                                                <i class="bi bi-files"></i> Show Documents
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="paragraph-text">
+                                        {{ para.text }}
+                                    </div>
+                                    
+                                    <!-- Document list for this paragraph (hidden by default) -->
+                                    <div class="para-documents mt-3" id="para-docs-{{ para.id }}" style="display: none;">
+                                        <h6>Documents containing this paragraph:</h6>
+                                        <ul class="list-group document-list-{{ para.id }}">
+                                            <li class="list-group-item text-center">
+                                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                Loading documents...
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info m-3">
+                            <p class="mb-0"><i class="bi bi-info-circle"></i> No paragraphs found with the current filters.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if paragraphs|length >= 100 %}
+                    <div class="card-footer text-center">
+                        <p class="text-muted mb-0">Showing top 100 results. Use filters to narrow down your search.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sync min_docs range and input
+        const minDocsRange = document.getElementById('min_docs_range');
+        const minDocsInput = document.getElementById('min_docs');
+        
+        minDocsRange.addEventListener('input', function() {
+            minDocsInput.value = minDocsRange.value;
+        });
+        
+        minDocsInput.addEventListener('input', function() {
+            minDocsRange.value = minDocsInput.value;
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchParagraph');
+        const exactMatchCheckbox = document.getElementById('exactMatch');
+        const paragraphItems = document.querySelectorAll('.paragraph-item');
+        const paragraphCount = document.getElementById('paragraphCount');
+        
+        searchInput.addEventListener('input', function() {
+            const searchText = searchInput.value.toLowerCase();
+            const exactMatch = exactMatchCheckbox.checked;
+            
+            let visibleCount = 0;
+            
+            paragraphItems.forEach(item => {
+                const paragraphText = item.querySelector('.paragraph-text').textContent.toLowerCase();
+                
+                let isMatch = false;
+                if (exactMatch) {
+                    isMatch = paragraphText.includes(searchText);
+                } else {
+                    const words = searchText.split(/\s+/).filter(word => word.length > 0);
+                    isMatch = words.every(word => paragraphText.includes(word));
+                }
+                
+                if (searchText === '' || isMatch) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            paragraphCount.textContent = visibleCount;
+        });
+        
+        exactMatchCheckbox.addEventListener('change', function() {
+            searchInput.dispatchEvent(new Event('input'));
+        });
+        
+        // Show documents containing a paragraph
+        const showDocsBtns = document.querySelectorAll('.show-documents-btn');
+        
+        showDocsBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const paraId = this.getAttribute('data-para-id');
+                const docsList = document.getElementById(`para-docs-${paraId}`);
+                
+                if (docsList.style.display === 'none') {
+                    docsList.style.display = 'block';
+                    
+                    // Simulate loading documents
+                    // In a real app, this would be an AJAX call to fetch documents
+                    setTimeout(() => {
+                        // Get the document list container
+                        const docListContainer = document.querySelector(`.document-list-${paraId}`);
+                        
+                        // Mock data - in a real app, this would come from the server
+                        // Here we're just simulating the result since we don't have an API endpoint for this
+                        const mockDocuments = [
+                            { id: 1, name: 'Sample Document 1.pdf', type: 'pdf' },
+                            { id: 2, name: 'Example Document 2.docx', type: 'docx' },
+                            { id: 3, name: 'Test Document 3.pdf', type: 'pdf' }
+                        ];
+                        
+                        // Clear loading indicator
+                        docListContainer.innerHTML = '';
+                        
+                        // If no documents, show message
+                        if (mockDocuments.length === 0) {
+                            docListContainer.innerHTML = `
+                                <li class="list-group-item text-center text-muted">
+                                    No documents found
+                                </li>
+                            `;
+                            return;
+                        }
+                        
+                        // Add documents to the list
+                        mockDocuments.forEach(doc => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'list-group-item';
+                            
+                            listItem.innerHTML = `
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark-${doc.type === 'pdf' ? 'pdf text-danger' : 'word text-primary'} me-2"></i>
+                                    <a href="/document/${doc.id}">${doc.name}</a>
+                                </div>
+                            `;
+                            
+                            docListContainer.appendChild(listItem);
+                        });
+                    }, 500);
+                    
+                } else {
+                    docsList.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
