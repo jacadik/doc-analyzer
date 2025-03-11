@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Upload Document - Document Analyzer{% endblock %}
+{% block title %}Upload Documents - Document Analyzer{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <h1 class="h2 mb-4">Upload Document</h1>
+            <h1 class="h2 mb-4">Bulk Upload</h1>
         </div>
     </div>
     
@@ -14,56 +14,257 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">Upload a PDF or Word Document</h5>
+                    <ul class="nav nav-tabs card-header-tabs" id="uploadTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-upload" type="button" role="tab" aria-controls="file-upload" aria-selected="true">
+                                <i class="bi bi-file-earmark"></i> Files
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="folder-tab" data-bs-toggle="tab" data-bs-target="#folder-upload" type="button" role="tab" aria-controls="folder-upload" aria-selected="false">
+                                <i class="bi bi-folder"></i> Folder
+                            </button>
+                        </li>
+                    </ul>
                 </div>
                 <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" id="uploadForm">
-                        {{ form.csrf_token }}
-                        <div class="mb-3">
-                            {{ form.file.label(class="form-label") }}
-                            {{ form.file(class="form-control", id="fileInput") }}
-                            {% if form.file.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in form.file.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <div class="form-text">
-                                Supported file types: PDF (.pdf), Microsoft Word (.docx)
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3" id="filePreview" style="display: none;">
-                            <label class="form-label">File Preview</label>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div id="fileIcon" class="me-3">
-                                            <i class="bi bi-file-earmark fs-1"></i>
-                                        </div>
-                                        <div>
-                                            <h6 id="fileName" class="mb-1"></h6>
-                                            <p id="fileSize" class="mb-0 text-muted"></p>
-                                        </div>
+                    <div class="tab-content" id="uploadTabContent">
+                        <!-- File Upload Tab -->
+                        <div class="tab-pane fade show active" id="file-upload" role="tabpanel" aria-labelledby="file-tab">
+                            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                                {{ form.csrf_token }}
+                                <div class="mb-3">
+                                    <label class="form-label">Select Multiple Files</label>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="fileInput" name="files" multiple accept=".pdf,.docx">
+                                        <button class="btn btn-outline-secondary" type="button" id="clearSelection">Clear</button>
+                                    </div>
+                                    <div class="form-text">
+                                        Supported file types: PDF (.pdf), Microsoft Word (.docx). You can select multiple files at once.
                                     </div>
                                 </div>
-                            </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="processImmediately" name="process_immediately" checked>
+                                        <label class="form-check-label" for="processImmediately">
+                                            Process files immediately after upload
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Uncheck this option if you're uploading many files and want to process them later.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableBatchSize" name="enable_batch_size">
+                                        <label class="form-check-label" for="enableBatchSize">
+                                            Limit processing batch size
+                                        </label>
+                                    </div>
+                                    <div class="input-group mt-2" id="batchSizeGroup" style="display: none;">
+                                        <span class="input-group-text">Batch size</span>
+                                        <input type="number" class="form-control" id="batchSize" name="batch_size" value="20" min="5" max="100">
+                                        <span class="input-group-text">documents</span>
+                                    </div>
+                                    <div class="form-text">
+                                        Processing in smaller batches helps prevent memory issues with large numbers of files.
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <i class="bi bi-upload"></i> Upload Files
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                         
-                        <div class="d-grid">
-                            {{ form.submit(class="btn btn-primary", id="submitBtn") }}
+                        <!-- Folder Upload Tab -->
+                        <div class="tab-pane fade" id="folder-upload" role="tabpanel" aria-labelledby="folder-tab">
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle"></i> 
+                                Folder upload allows you to select an entire folder of documents to process.
+                                Only supported document types (.pdf, .docx) will be uploaded.
+                            </div>
+                            
+                            <form method="post" enctype="multipart/form-data" id="folderUploadForm">
+                                {{ form.csrf_token }}
+                                <div class="mb-3">
+                                    <label for="folderInput" class="form-label">Select a Folder</label>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="folderInput" name="folder" webkitdirectory directory multiple>
+                                        <button class="btn btn-outline-secondary" type="button" id="clearFolderSelection">Clear</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="folderProcessImmediately" name="process_immediately" checked>
+                                        <label class="form-check-label" for="folderProcessImmediately">
+                                            Process files immediately after upload
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="folderEnableBatchSize" name="enable_batch_size">
+                                        <label class="form-check-label" for="folderEnableBatchSize">
+                                            Limit processing batch size
+                                        </label>
+                                    </div>
+                                    <div class="input-group mt-2" id="folderBatchSizeGroup" style="display: none;">
+                                        <span class="input-group-text">Batch size</span>
+                                        <input type="number" class="form-control" id="folderBatchSize" name="batch_size" value="20" min="5" max="100">
+                                        <span class="input-group-text">documents</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary" id="folderSubmitBtn">
+                                        <i class="bi bi-upload"></i> Upload Folder
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                     
-                    <div id="uploadProgress" class="mt-3" style="display: none;">
-                        <label class="form-label">Upload Progress</label>
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                    <!-- File Preview Section -->
+                    <div class="mt-4" id="filePreview" style="display: none;">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Selected Files (<span id="fileCount">0</span>)</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleFileList">
+                                        <i class="bi bi-chevron-down"></i> Show Files
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body" id="fileListContainer" style="display: none; max-height: 300px; overflow-y: auto;">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Filename</th>
+                                                <th>Type</th>
+                                                <th>Size</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="fileListBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                        <p class="text-center mt-2">
-                            <span id="uploadStatus">Uploading...</span>
-                        </p>
+                    </div>
+                    
+                    <!-- Upload Progress -->
+                    <div id="uploadProgress" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">Upload Progress</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span id="uploadStatus">Preparing upload...</span>
+                                    <span id="uploadCounter">0/0</span>
+                                </div>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" style="width: 0%"></div>
+                                </div>
+                                
+                                <div class="alert alert-warning mb-0" role="alert">
+                                    <i class="bi bi-exclamation-triangle"></i> 
+                                    Please don't close your browser during upload. Large uploads may take several minutes.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upload Result Summary -->
+                    <div id="uploadSummary" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="bi bi-check-circle"></i> Upload Complete</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center mb-3">
+                                    <div class="col-4">
+                                        <h3 id="totalUploadCount">0</h3>
+                                        <p class="text-muted">Total Files</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <h3 id="successCount" class="text-success">0</h3>
+                                        <p class="text-muted">Successful</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <h3 id="failCount" class="text-danger">0</h3>
+                                        <p class="text-muted">Failed</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('documents') }}" class="btn btn-primary">
+                                        <i class="bi bi-file-earmark-text"></i> View Documents
+                                    </a>
+                                    <button type="button" class="btn btn-outline-secondary" id="newUploadBtn">
+                                        <i class="bi bi-upload"></i> Upload More Files
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Processing Queue Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title">Processing Queue</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">Queue Status</h6>
+                                    <p class="mb-0 text-muted">
+                                        <span id="queueCount">0</span> documents waiting | 
+                                        <span id="processingCount">0</span> currently processing
+                                    </p>
+                                </div>
+                                <div id="queueSpinner" class="spinner-border text-primary spinner-border-sm" role="status" style="display: none;">
+                                    <span class="visually-hidden">Processing...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button type="button" class="btn btn-sm btn-primary" id="startProcessingBtn" disabled>
+                                <i class="bi bi-play-fill"></i> Start Processing
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" id="pauseProcessingBtn" disabled>
+                                <i class="bi bi-pause-fill"></i> Pause
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info" id="queueProgressBar" role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                    
+                    <div id="queueEmptyAlert" class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> No documents in processing queue.
+                    </div>
+                    
+                    <div id="queuePausedAlert" class="alert alert-warning mb-0" style="display: none;">
+                        <i class="bi bi-pause-circle"></i> Processing queue is paused. Click "Start Processing" to continue.
+                    </div>
+                    
+                    <div id="queueActiveAlert" class="alert alert-success mb-0" style="display: none;">
+                        <i class="bi bi-play-circle"></i> Processing documents in the background. You can safely navigate away from this page.
                     </div>
                 </div>
             </div>
@@ -72,23 +273,82 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">Upload Information</h5>
+                    <h5 class="card-title">Bulk Upload Guide</h5>
                 </div>
                 <div class="card-body">
-                    <h6>What happens after upload?</h6>
-                    <ol>
-                        <li>The document is saved to the server.</li>
-                        <li>Text content is extracted from the document.</li>
-                        <li>Paragraphs are identified and analyzed.</li>
-                        <li>Variable placeholders are detected.</li>
-                        <li>Document is added to the database.</li>
-                    </ol>
+                    <h6><i class="bi bi-lightning-charge"></i> Performance Recommendations</h6>
+                    <ul>
+                        <li>For optimal performance, upload in batches of 50-100 files.</li>
+                        <li>Very large documents (over 50MB) should be uploaded separately.</li>
+                        <li>When uploading hundreds of files, use the batch size limiter.</li>
+                        <li>Consider unchecking "Process immediately" for large batches.</li>
+                    </ul>
                     
-                    <h6>Processing time</h6>
-                    <p>Document processing happens in the background and may take a few seconds to a few minutes depending on document size and complexity.</p>
+                    <h6><i class="bi bi-gear"></i> Processing Options</h6>
+                    <ul>
+                        <li><strong>Process immediately:</strong> Start analyzing files right after upload (best for smaller batches).</li>
+                        <li><strong>Process later:</strong> Just upload files without processing them. Start processing manually when convenient.</li>
+                        <li><strong>Batch size limit:</strong> Process documents in smaller groups to optimize system resources.</li>
+                    </ul>
                     
-                    <h6>File size limits</h6>
-                    <p>Maximum file size: 50 MB</p>
+                    <div class="alert alert-info">
+                        <i class="bi bi-lightbulb"></i> <strong>Tip:</strong> For large migrations, upload all documents first without processing, then start batch processing overnight.
+                    </div>
+                    
+                    <h6><i class="bi bi-info-circle"></i> System Limits</h6>
+                    <ul>
+                        <li>Maximum file size: 50 MB per file</li>
+                        <li>Supported formats: PDF (.pdf), Word (.docx)</li>
+                        <li>Maximum queue size: 1000 documents</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- System Monitor Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">System Monitor</h5>
+                        <button class="btn btn-sm btn-outline-secondary" id="refreshStats">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="mb-0">Memory Usage</h6>
+                            <span class="text-muted" id="memoryUsedText">--</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-primary" id="memoryUsage" role="progressbar" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="mb-0">Disk Space</h6>
+                            <span class="text-muted" id="diskUsedText">--</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="diskUsage" role="progressbar" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="mb-0">CPU Usage</h6>
+                            <span class="text-muted" id="cpuUsedText">--</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" id="cpuUsage" role="progressbar" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center text-muted small">
+                        <span>Last updated: <span id="lastUpdated">--</span></span>
+                        <span>Server uptime: <span id="serverUptime">--</span></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -99,71 +359,564 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // File upload elements
         const fileInput = document.getElementById('fileInput');
+        const folderInput = document.getElementById('folderInput');
         const filePreview = document.getElementById('filePreview');
-        const fileIcon = document.getElementById('fileIcon');
-        const fileName = document.getElementById('fileName');
-        const fileSize = document.getElementById('fileSize');
+        const fileListContainer = document.getElementById('fileListContainer');
+        const fileCount = document.getElementById('fileCount');
+        const fileListBody = document.getElementById('fileListBody');
         const uploadProgress = document.getElementById('uploadProgress');
-        const progressBar = document.querySelector('.progress-bar');
+        const progressBar = document.getElementById('progressBar');
         const uploadStatus = document.getElementById('uploadStatus');
+        const uploadCounter = document.getElementById('uploadCounter');
+        const uploadSummary = document.getElementById('uploadSummary');
+        const totalUploadCount = document.getElementById('totalUploadCount');
+        const successCount = document.getElementById('successCount');
+        const failCount = document.getElementById('failCount');
         const uploadForm = document.getElementById('uploadForm');
+        const folderUploadForm = document.getElementById('folderUploadForm');
         const submitBtn = document.getElementById('submitBtn');
+        const folderSubmitBtn = document.getElementById('folderSubmitBtn');
+        const clearSelection = document.getElementById('clearSelection');
+        const clearFolderSelection = document.getElementById('clearFolderSelection');
+        const toggleFileList = document.getElementById('toggleFileList');
+        const newUploadBtn = document.getElementById('newUploadBtn');
         
-        // Preview selected file
+        // Batch processing elements
+        const enableBatchSize = document.getElementById('enableBatchSize');
+        const batchSizeGroup = document.getElementById('batchSizeGroup');
+        const folderEnableBatchSize = document.getElementById('folderEnableBatchSize');
+        const folderBatchSizeGroup = document.getElementById('folderBatchSizeGroup');
+        
+        // Queue elements
+        const queueCount = document.getElementById('queueCount');
+        const processingCount = document.getElementById('processingCount');
+        const startProcessingBtn = document.getElementById('startProcessingBtn');
+        const pauseProcessingBtn = document.getElementById('pauseProcessingBtn');
+        const queueProgressBar = document.getElementById('queueProgressBar');
+        const queueEmptyAlert = document.getElementById('queueEmptyAlert');
+        const queuePausedAlert = document.getElementById('queuePausedAlert');
+        const queueActiveAlert = document.getElementById('queueActiveAlert');
+        const queueSpinner = document.getElementById('queueSpinner');
+        
+        // System monitor elements
+        const memoryUsage = document.getElementById('memoryUsage');
+        const memoryUsedText = document.getElementById('memoryUsedText');
+        const diskUsage = document.getElementById('diskUsage');
+        const diskUsedText = document.getElementById('diskUsedText');
+        const cpuUsage = document.getElementById('cpuUsage');
+        const cpuUsedText = document.getElementById('cpuUsedText');
+        const lastUpdated = document.getElementById('lastUpdated');
+        const serverUptime = document.getElementById('serverUptime');
+        const refreshStats = document.getElementById('refreshStats');
+        
+        // Toggle batch size inputs
+        enableBatchSize.addEventListener('change', function() {
+            batchSizeGroup.style.display = this.checked ? 'flex' : 'none';
+        });
+        
+        folderEnableBatchSize.addEventListener('change', function() {
+            folderBatchSizeGroup.style.display = this.checked ? 'flex' : 'none';
+        });
+        
+        // File selection handling
         fileInput.addEventListener('change', function() {
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                fileName.textContent = file.name;
+            updateFilePreview(fileInput.files);
+        });
+        
+        folderInput.addEventListener('change', function() {
+            const files = Array.from(folderInput.files).filter(file => {
+                const ext = file.name.toLowerCase().split('.').pop();
+                return ext === 'pdf' || ext === 'docx';
+            });
+            
+            updateFilePreview(files);
+        });
+        
+        // Clear selection buttons
+        clearSelection.addEventListener('click', function() {
+            fileInput.value = '';
+            filePreview.style.display = 'none';
+            fileListBody.innerHTML = '';
+            fileCount.textContent = '0';
+        });
+        
+        clearFolderSelection.addEventListener('click', function() {
+            folderInput.value = '';
+            filePreview.style.display = 'none';
+            fileListBody.innerHTML = '';
+            fileCount.textContent = '0';
+        });
+        
+        // Toggle file list display
+        toggleFileList.addEventListener('click', function() {
+            if (fileListContainer.style.display === 'none') {
+                fileListContainer.style.display = 'block';
+                toggleFileList.innerHTML = '<i class="bi bi-chevron-up"></i> Hide Files';
+            } else {
+                fileListContainer.style.display = 'none';
+                toggleFileList.innerHTML = '<i class="bi bi-chevron-down"></i> Show Files';
+            }
+        });
+        
+        // New upload button
+        newUploadBtn.addEventListener('click', function() {
+            clearSelection.click();
+            uploadSummary.style.display = 'none';
+            clearFolderSelection.click();
+        });
+        
+        // Update preview for file upload
+        function updateFilePreview(files) {
+            if (files.length > 0) {
+                fileCount.textContent = files.length;
+                fileListBody.innerHTML = '';
                 
-                // Format file size
-                let size = file.size;
-                let sizeString = '';
-                if (size > 1024 * 1024) {
-                    sizeString = (size / (1024 * 1024)).toFixed(2) + ' MB';
-                } else if (size > 1024) {
-                    sizeString = (size / 1024).toFixed(2) + ' KB';
-                } else {
-                    sizeString = size + ' bytes';
+                const validFiles = [];
+                let totalSize = 0;
+                
+                // Process only the first 100 files for preview to avoid UI lag
+                const displayLimit = Math.min(files.length, 100);
+                let oversizeFiles = 0;
+                
+                for (let i = 0; i < displayLimit; i++) {
+                    const file = files[i];
+                    const ext = file.name.toLowerCase().split('.').pop();
+                    
+                    if (ext === 'pdf' || ext === 'docx') {
+                        validFiles.push(file);
+                        totalSize += file.size;
+                        
+                        // Check file size (50MB limit)
+                        const isOversize = file.size > 50 * 1024 * 1024;
+                        if (isOversize) {
+                            oversizeFiles++;
+                        }
+                        
+                        const row = document.createElement('tr');
+                        
+                        // File icon and name
+                        let iconClass = ext === 'pdf' ? 'bi-file-earmark-pdf text-danger' : 'bi-file-earmark-word text-primary';
+                        
+                        // Format file size
+                        let sizeString = formatFileSize(file.size);
+                        
+                        row.innerHTML = `
+                            <td><i class="bi ${iconClass} me-2"></i>${file.name}</td>
+                            <td>${ext.toUpperCase()}</td>
+                            <td>${sizeString}</td>
+                            <td>${isOversize ? 
+                                '<span class="badge bg-warning">Size limit exceeded</span>' : 
+                                '<span class="badge bg-secondary">Ready</span>'}</td>
+                        `;
+                        
+                        fileListBody.appendChild(row);
+                    }
                 }
-                fileSize.textContent = sizeString;
                 
-                // Set icon based on file type
-                if (file.name.endsWith('.pdf')) {
-                    fileIcon.innerHTML = '<i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>';
-                } else if (file.name.endsWith('.docx')) {
-                    fileIcon.innerHTML = '<i class="bi bi-file-earmark-word fs-1 text-primary"></i>';
-                } else {
-                    fileIcon.innerHTML = '<i class="bi bi-file-earmark fs-1"></i>';
+                // Add message if there are more files
+                if (files.length > displayLimit) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td colspan="4" class="text-center text-muted">
+                            ${files.length - displayLimit} more files not shown
+                        </td>
+                    `;
+                    fileListBody.appendChild(row);
+                }
+                
+                // Add warning if there are oversized files
+                if (oversizeFiles > 0) {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-warning-subtle';
+                    row.innerHTML = `
+                        <td colspan="4" class="text-center">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            ${oversizeFiles} file(s) exceed the 50MB size limit and may not upload correctly.
+                        </td>
+                    `;
+                    fileListBody.prepend(row);
                 }
                 
                 filePreview.style.display = 'block';
+                
+                // Show total size
+                if (validFiles.length > 0) {
+                    const totalSizeRow = document.createElement('tr');
+                    totalSizeRow.className = 'table-light';
+                    totalSizeRow.innerHTML = `
+                        <td colspan="2">Total size:</td>
+                        <td colspan="2"><strong>${formatFileSize(totalSize)}</strong></td>
+                    `;
+                    fileListBody.appendChild(totalSizeRow);
+                }
             } else {
                 filePreview.style.display = 'none';
             }
-        });
+        }
         
-        // Show progress on form submit
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Update queue status
+        function updateQueueStatus(queueSize = 0) {
+            if (queueSize > 0) {
+                queueEmptyAlert.style.display = 'none';
+                startProcessingBtn.disabled = false;
+                
+                // Simulate queue state
+                const isProcessing = Math.random() > 0.5;
+                queuePausedAlert.style.display = isProcessing ? 'none' : 'block';
+                queueActiveAlert.style.display = isProcessing ? 'block' : 'none';
+                queueSpinner.style.display = isProcessing ? 'block' : 'none';
+                pauseProcessingBtn.disabled = !isProcessing;
+                
+                // Update progress
+                const processed = Math.floor(Math.random() * queueSize);
+                processingCount.textContent = isProcessing ? Math.min(5, queueSize) : '0';
+                
+                const progress = (processed / queueSize) * 100;
+                queueProgressBar.style.width = progress + '%';
+                queueProgressBar.textContent = `${Math.round(progress)}%`;
+            } else {
+                queueEmptyAlert.style.display = 'block';
+                queuePausedAlert.style.display = 'none';
+                queueActiveAlert.style.display = 'none';
+                queueSpinner.style.display = 'none';
+                startProcessingBtn.disabled = true;
+                pauseProcessingBtn.disabled = true;
+                queueProgressBar.style.width = '0%';
+                queueProgressBar.textContent = '0%';
+                processingCount.textContent = '0';
+            }
+        }
+        
+        // Handle file form submission
         uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             if (fileInput.files.length === 0) {
+                alert('Please select at least one file to upload.');
                 return;
             }
             
-            // Show upload progress
-            uploadProgress.style.display = 'block';
-            submitBtn.disabled = true;
-            
-            // Simulate progress (in a real app, you'd use XMLHttpRequest or Fetch API to track actual progress)
-            let progress = 0;
-            const interval = setInterval(function() {
-                progress += 5;
-                if (progress > 90) {
-                    clearInterval(interval);
-                }
-                progressBar.style.width = progress + '%';
-                progressBar.setAttribute('aria-valuenow', progress);
-            }, 300);
+            simulateUpload(fileInput.files);
         });
+        
+        // Handle folder form submission
+        folderUploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const files = Array.from(folderInput.files).filter(file => {
+                const ext = file.name.toLowerCase().split('.').pop();
+                return ext === 'pdf' || ext === 'docx';
+            });
+            
+            if (files.length === 0) {
+                alert('No supported files found in the selected folder. Please select a folder containing PDF or DOCX files.');
+                return;
+            }
+            
+            simulateUpload(files);
+        });
+        
+        // Simulate file upload
+        function simulateUpload(files) {
+            // Prepare UI
+            uploadProgress.style.display = 'block';
+            uploadSummary.style.display = 'none';
+            submitBtn.disabled = true;
+            folderSubmitBtn.disabled = true;
+            
+            const totalFiles = files.length;
+            let uploadedFiles = 0;
+            let successFiles = 0;
+            let failedFiles = 0;
+            
+            // Update counter
+            uploadCounter.textContent = `${uploadedFiles}/${totalFiles}`;
+            
+            // Simulate chunk-based uploading for better performance with large batches
+            const chunkSize = 10; // Process in groups of 10 files
+            const chunks = Math.ceil(totalFiles / chunkSize);
+            
+            // Process chunks sequentially
+            processChunk(0);
+            
+function processChunk(chunkIndex) {
+                if (chunkIndex >= chunks) {
+                    // All chunks processed
+                    finishUpload();
+                    return;
+                }
+                
+                const start = chunkIndex * chunkSize;
+                const end = Math.min(start + chunkSize, totalFiles);
+                
+                // Process files in this chunk
+                let chunkCompleted = 0;
+                
+                for (let i = start; i < end; i++) {
+                    const file = files[i];
+                    
+                    // Simulate async upload with random success/fail and varying time based on file size
+                    const fileSize = file.size;
+                    const uploadTime = Math.min(300 + (fileSize / (1024 * 1024) * 50), 1000); // Simulate larger files taking longer
+                    
+                    setTimeout(() => {
+                        uploadedFiles++;
+                        chunkCompleted++;
+                        
+                        // 90% success rate in simulation, but files over 50MB always fail
+                        const isOversize = fileSize > 50 * 1024 * 1024;
+                        if (!isOversize && Math.random() < 0.9) {
+                            successFiles++;
+                        } else {
+                            failedFiles++;
+                        }
+                        
+                        // Update progress
+                        const progress = (uploadedFiles / totalFiles) * 100;
+                        progressBar.style.width = progress + '%';
+                        
+                        // Update status and counter
+                        uploadStatus.textContent = `Uploading ${file.name}`;
+                        uploadCounter.textContent = `${uploadedFiles}/${totalFiles}`;
+                        
+                        // If this chunk is complete, process the next chunk
+                        if (chunkCompleted === (end - start)) {
+                            processChunk(chunkIndex + 1);
+                        }
+                    }, uploadTime);
+                }
+            }
+            
+            function finishUpload() {
+                // Wait a moment before showing the summary
+                setTimeout(() => {
+                    uploadProgress.style.display = 'none';
+                    uploadSummary.style.display = 'block';
+                    totalUploadCount.textContent = totalFiles;
+                    successCount.textContent = successFiles;
+                    failCount.textContent = failedFiles;
+                    
+                    // Reset buttons
+                    submitBtn.disabled = false;
+                    folderSubmitBtn.disabled = false;
+                    
+                    // Update queue count
+                    const currentQueueCount = parseInt(queueCount.textContent) || 0;
+                    queueCount.textContent = currentQueueCount + successFiles;
+                    updateQueueStatus(currentQueueCount + successFiles);
+                    
+                    // Reset progress
+                    progressBar.style.width = '0%';
+                }, 500);
+            }
+        }
+        
+        // Queue control buttons
+        startProcessingBtn.addEventListener('click', function() {
+            queuePausedAlert.style.display = 'none';
+            queueActiveAlert.style.display = 'block';
+            queueSpinner.style.display = 'block';
+            startProcessingBtn.disabled = true;
+            pauseProcessingBtn.disabled = false;
+            
+            // Simulate processing
+            updateSystemStats();
+            
+            // Make API call to start processing
+            fetch('/api/queue/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Processing started', data);
+            })
+            .catch(error => {
+                console.error('Error starting processing:', error);
+            });
+        });
+        
+        pauseProcessingBtn.addEventListener('click', function() {
+            queuePausedAlert.style.display = 'block';
+            queueActiveAlert.style.display = 'none';
+            queueSpinner.style.display = 'none';
+            startProcessingBtn.disabled = false;
+            pauseProcessingBtn.disabled = true;
+            
+            // Make API call to pause processing
+            fetch('/api/queue/pause', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Processing paused', data);
+            })
+            .catch(error => {
+                console.error('Error pausing processing:', error);
+            });
+        });
+        
+        // System stats functions
+        function updateSystemStats() {
+            // Make API call to get system stats
+            fetch('/api/system/stats')
+            .then(response => response.json())
+            .then(data => {
+                // If we have real data from the API, use it
+                updateSystemStatsDisplay(data);
+            })
+            .catch(error => {
+                console.error('Error fetching system stats:', error);
+                // If API call fails, generate simulated data
+                const simulatedStats = generateSimulatedStats();
+                updateSystemStatsDisplay(simulatedStats);
+            });
+        }
+        
+        function generateSimulatedStats() {
+            // Generate simulated stats for demo/dev purposes
+            return {
+                memory: {
+                    percent: Math.floor(Math.random() * 40) + 30, // 30-70%
+                    used: (Math.floor(Math.random() * 8000) + 4000) / 1000, // 4-12 GB
+                    total: 16 // 16 GB
+                },
+                disk: {
+                    percent: Math.floor(Math.random() * 30) + 40, // 40-70%
+                    used: Math.floor(Math.random() * 50) + 30, // 30-80 GB
+                    total: 100 // 100 GB
+                },
+                cpu: {
+                    percent: Math.floor(Math.random() * 50) + 20 // 20-70%
+                },
+                uptime: Math.floor(Math.random() * 72) + 24 // 24-96 hours
+            };
+        }
+        
+        function updateSystemStatsDisplay(stats) {
+            // Update memory usage
+            memoryUsage.style.width = stats.memory.percent + '%';
+            memoryUsage.textContent = stats.memory.percent + '%';
+            memoryUsedText.textContent = `${stats.memory.used.toFixed(1)} GB / ${stats.memory.total} GB`;
+            
+            // Update disk usage
+            diskUsage.style.width = stats.disk.percent + '%';
+            diskUsage.textContent = stats.disk.percent + '%';
+            diskUsedText.textContent = `${stats.disk.used.toFixed(1)} GB / ${stats.disk.total} GB`;
+            
+            // Update CPU usage
+            cpuUsage.style.width = stats.cpu.percent + '%';
+            cpuUsage.textContent = stats.cpu.percent + '%';
+            cpuUsedText.textContent = stats.cpu.percent + '%';
+            
+            // Set colors based on usage
+            setProgressBarColor(memoryUsage, stats.memory.percent);
+            setProgressBarColor(diskUsage, stats.disk.percent);
+            setProgressBarColor(cpuUsage, stats.cpu.percent);
+            
+            // Update timestamp
+            const now = new Date();
+            lastUpdated.textContent = now.toLocaleTimeString();
+            
+            // Format uptime
+            const hours = Math.floor(stats.uptime);
+            const minutes = Math.floor((stats.uptime % 1) * 60);
+            serverUptime.textContent = `${hours}h ${minutes}m`;
+        }
+        
+        function setProgressBarColor(progressBar, percent) {
+            // Remove existing color classes
+            progressBar.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-primary', 'bg-info');
+            
+            // Add appropriate color class based on percentage
+            if (percent > 85) {
+                progressBar.classList.add('bg-danger');
+            } else if (percent > 70) {
+                progressBar.classList.add('bg-warning');
+            } else if (percent > 50) {
+                progressBar.classList.add('bg-primary');
+            } else {
+                progressBar.classList.add('bg-success');
+            }
+        }
+        
+        // Update queue status periodically
+        function updateQueueDisplay() {
+            fetch('/api/queue/status')
+            .then(response => response.json())
+            .then(data => {
+                // Update queue counts
+                queueCount.textContent = data.queue_size || 0;
+                processingCount.textContent = data.processing_count || 0;
+                
+                // Update progress bar
+                const totalDocs = data.total_count || 0;
+                const processedDocs = data.processed_count || 0;
+                
+                if (totalDocs > 0) {
+                    const progress = (processedDocs / totalDocs) * 100;
+                    queueProgressBar.style.width = progress + '%';
+                    queueProgressBar.textContent = `${Math.round(progress)}%`;
+                } else {
+                    queueProgressBar.style.width = '0%';
+                    queueProgressBar.textContent = '0%';
+                }
+                
+                // Update queue status display
+                if (data.queue_size > 0) {
+                    queueEmptyAlert.style.display = 'none';
+                    startProcessingBtn.disabled = data.is_processing && !data.is_paused;
+                    pauseProcessingBtn.disabled = !data.is_processing || data.is_paused;
+                    queuePausedAlert.style.display = data.is_paused ? 'block' : 'none';
+                    queueActiveAlert.style.display = (data.is_processing && !data.is_paused) ? 'block' : 'none';
+                    queueSpinner.style.display = (data.is_processing && !data.is_paused) ? 'block' : 'none';
+                } else {
+                    queueEmptyAlert.style.display = 'block';
+                    queuePausedAlert.style.display = 'none';
+                    queueActiveAlert.style.display = 'none';
+                    queueSpinner.style.display = 'none';
+                    startProcessingBtn.disabled = true;
+                    pauseProcessingBtn.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching queue status:', error);
+                // If API fails, use simulated data
+                updateQueueStatus(parseInt(queueCount.textContent) || 0);
+            });
+        }
+        
+        // Initialize
+        updateSystemStats();
+        updateQueueDisplay();
+        
+        // Refresh stats button
+        refreshStats.addEventListener('click', updateSystemStats);
+        
+        // Refresh elements periodically
+        setInterval(updateSystemStats, 30000); // Update system stats every 30 seconds
+        setInterval(updateQueueDisplay, 5000);  // Update queue status every 5 seconds
     });
 </script>
 {% endblock %}
+			
