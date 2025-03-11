@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Paragraphs - Document Analyzer</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- The CSS styles are the same as the main layout, excluded here for brevity -->
+</head>
+<body>
+    <!-- Header and Sidebar would be here (same as main layout) -->
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/documents">Documents</a></li>
+                        <li class="breadcrumb-item"><a href="/document/1">Contract_Template_2023.pdf</a></li>
+                        <li class="breadcrumb-item active">Paragraphs</li>
+                    </ol>
+                </nav>
+                <h1 class="h3 mb-0">Document Paragraphs</h1>
+            </div>
+            
+            <div class="d-flex gap-2 mt-2 mt-md-0">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="optionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear me-1"></i> Options
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="optionsDropdown">
+                        <li>
+                            <a class="dropdown-item" href="/document/1/text">
+                                <i class="bi bi-file-text me-2"></i> View Text
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/document/1/variables">
+                                <i class="bi bi-code-square me-2"></i> View Variables
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/document/1/analyze">
+                                <i class="bi bi-search me-2"></i> Analyze Content
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/export/document/1">
+                                <i class="bi bi-file-earmark-excel me-2"></i> Export to Excel
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <a href="/document/1" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Paragraph Stats -->
+            <div class="col-lg-4 col-md-12 mb-4">
+                <!-- Stats Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title">Paragraph Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="card h-100 bg-light border-0">
+                                    <div class="card-body text-center">
+                                        <h3 class="mb-0">32</h3>
+                                        <p class="card-text text-muted mb-0">Total Paragraphs</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card h-100 bg-light border-0">
+                                    <div class="card-body text-center">
+                                        <h3 class="mb-0">112</h3>
+                                        <p class="card-text text-muted mb-0">Avg. Length</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <th>Shortest Paragraph</th>
+                                        <td class="text-end">24 chars</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Longest Paragraph</th>
+                                        <td class="text-end">312 chars</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Total Characters</th>
+                                        <td class="text-end">3,584</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filter Options -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Filter Options</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="searchParagraph" class="form-label">Search in Paragraphs</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="searchParagraph" placeholder="Type to search...">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="sortParagraphs" class="form-label">Sort By</label>
+                            <select class="form-select" id="sortParagraphs">
+                                <option value="position">Position (Default)</option>
+                                <option value="length_desc">Length (Longest First)</option>
+                                <option value="length_asc">Length (Shortest First)</option>
+                                <option value="doc_count_desc">Document Count (Highest First)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Filter By</label>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input filter-check" type="checkbox" id="filterCommon" value="common">
+                                <label class="form-check-label" for="filterCommon">
+                                    Common Paragraphs (in multiple documents)
+                                </label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input filter-check" type="checkbox" id="filterWithVars" value="with_vars">
+                                <label class="form-check-label" for="filterWithVars">
+                                    Paragraphs with Variables
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Paragraph List -->
+            <div class="col-lg-8 col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Paragraphs</h5>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary me-2" id="paragraphCount">32</span>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-sliders"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#" id="expandAll">Expand All</a></li>
+                                    <li><a class="dropdown-item" href="#" id="collapseAll">Collapse All</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush paragraph-list">
+                            <!-- Paragraph 1 -->
+                            <div class="list-group-item paragraph-item" data-position="1" data-length="136" data-doc-count="5" data-has-vars="true" data-is-common="true">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-secondary me-2">#1</span>
+                                        <button class="btn btn-sm btn-outline-primary paragraph-toggle" type="button">
+                                            <i class="bi bi-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                    <div class="badge-container">
+                                        <span class="badge bg-success me-1" title="This paragraph appears in 5 documents">
+                                            <i class="bi bi-files"></i> 5
+                                        </span>
+                                        <span class="badge bg-info text-dark me-1" title="Contains variables">
+                                            <i class="bi bi-code-square"></i> Variables
+                                        </span>
+                                        <span class="badge bg-light text-dark">
+                                            136 chars
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="paragraph-text mt-2 bg-light p-3 rounded" style="display: none;">
+                                    <p class="mb-0">
+                                        This Service Agreement (the "Agreement") is entered into on <span class="highlight-variable">&lt;&lt;contract_date&gt;&gt;</span> by and between <span class="highlight-variable">&lt;&lt;company_name&gt;&gt;</span> and <span class="highlight-variable">&lt;&lt;customer_name&gt;&gt;</span>.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Paragraph 2 -->
+                            <div class="list-group-item paragraph-item" data-position="2" data-length="210" data-doc-count="4" data-has-vars="true" data-is-common="true">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-secondary me-2">#2</span>
+                                        <button class="btn btn-sm btn-outline-primary paragraph-toggle" type="button">
+                                            <i class="bi bi-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                    <div class="badge-container">
+                                        <span class="badge bg-success me-1" title="This paragraph appears in 4 documents">
+                                            <i class="bi bi-files"></i> 4
+                                        </span>
+                                        <span class="badge bg-info text-dark me-1" title="Contains variables">
+                                            <i class="bi bi-code-square"></i> Variables
+                                        </span>
+                                        <span class="badge bg-light text-dark">
+                                            210 chars
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="paragraph-text mt-2 bg-light p-3 rounded" style="display: none;">
+                                    <p class="mb-0">
+                                        <span class="highlight-variable">&lt;&lt;company_name&gt;&gt;</span>, a company registered under the laws of [Jurisdiction], with its principal place of business at <span class="highlight-variable">&lt;&lt;company_address&gt;&gt;</span> (hereinafter referred to as the "Service Provider"); and
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Paragraph 3 -->
+                            <div class="list-group-item paragraph-item" data-position="3" data-length="152" data-doc-count="4" data-has-vars="true" data-is-common="true">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-secondary me-2">#3</span>
+                                        <button class="btn btn-sm btn-outline-primary paragraph-toggle" type="button">
+                                            <i class="bi bi-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                    <div class="badge-container">
+                                        <span class="badge bg-success me-1" title="This paragraph appears in 4 documents">
+                                            <i class="bi bi-files"></i> 4
+                                        </span>
+                                        <span class="badge bg-info text-dark me-1" title="Contains variables">
+                                            <i class="bi bi-code-square"></i> Variables
+                                        </span>
+                                        <span class="badge bg-light text-dark">
+                                            152 chars
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="paragraph-text mt-2 bg-light p-3 rounded" style="display: none;">
+                                    <p class="mb-0">
+                                        <span class="highlight-variable">&lt;&lt;customer_name&gt;&gt;</span>, with its principal place of business at [Customer Address] (hereinafter referred to as the "Customer").
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Paragraph 4 -->
+                            <div class="list-group-item paragraph-item" data-position="4" data-length="98" data-doc-count="3" data-has-vars="true" data-is-common="true">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-secondary me-2">#4</span>
+                                        <button class="btn btn-sm btn-outline-primary paragraph-toggle" type="button">
+                                            <i class="bi bi-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                    <div class="badge-container">
+                                        <span class="badge bg-success me-1" title="This paragraph appears in 3 documents">
+                                            <i class="bi bi-files"></i> 3
+                                        </span>
+                                        <span class="badge bg-info text-dark me-1" title="Contains variables">
+                                            <i class="bi bi-code-square"></i> Variables
+                                        </span>
+                                        <span class="badge bg-light text-dark">
+                                            98 chars
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="paragraph-text mt-2 bg-light p-3 rounded" style="display: none;">
+                                    <p class="mb-0">
+                                        WHEREAS, the Service Provider is in the business of providing <span class="highlight-variable">&lt;&lt;service_type&gt;&gt;</span> services; and
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- More paragraphs would go here -->
+                            <div class="list-group-item text-center py-3">
+                                <button type="button" class="btn btn-outline-primary" id="loadMoreParagraphs">
+                                    <i class="bi bi-plus-circle me-1"></i> Load More Paragraphs
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer would be here (same as main layout) -->
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle paragraph text
+            const toggleButtons = document.querySelectorAll('.paragraph-toggle');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const paragraphItem = this.closest('.paragraph-item');
+                    const paragraphText = paragraphItem.querySelector('.paragraph-text');
+                    const icon = this.querySelector('i');
+                    
+                    if (paragraphText.style.display === 'none') {
+                        paragraphText.style.display = 'block';
+                        icon.classList.remove('bi-chevron-down');
+                        icon.classList.add('bi-chevron-up');
+                    } else {
+                        paragraphText.style.display = 'none';
+                        icon.classList.remove('bi-chevron-up');
+                        icon.classList.add('bi-chevron-down');
+                    }
+                });
+            });
+            
+            // Expand all paragraphs
+            document.getElementById('expandAll').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                document.querySelectorAll('.paragraph-text').forEach(text => {
+                    text.style.display = 'block';
+                });
+                
+                document.querySelectorAll('.paragraph-toggle i').forEach(icon => {
+                    icon.classList.remove('bi-chevron-down');
+                    icon.classList.add('bi-chevron-up');
+                });
+            });
+            
+            // Collapse all paragraphs
+            document.getElementById('collapseAll').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                document.querySelectorAll('.paragraph-text').forEach(text => {
+                    text.style.display = 'none';
+                });
+                
+                document.querySelectorAll('.paragraph-toggle i').forEach(icon => {
+                    icon.classList.remove('bi-chevron-up');
+                    icon.classList.add('bi-chevron-down');
+                });
+            });
+            
+            // Search and filter functionality
+            const paragraphItems = document.querySelectorAll('.paragraph-item');
+            const searchInput = document.getElementById('searchParagraph');
+            const sortSelect = document.getElementById('sortParagraphs');
+            const filterCheckboxes = document.querySelectorAll('.filter-check');
+            const paragraphCount = document.getElementById('paragraphCount');
+            
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                applyFilters();
+            });
+            
+            // Sort functionality
+            sortSelect.addEventListener('change', function() {
+                applySort();
+                applyFilters();
+            });
+            
+            // Filter checkboxes
+            filterCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    applyFilters();
+                });
+            });
+            
+            // Apply filters function
+            function applyFilters() {
+                const searchText = searchInput.value.toLowerCase();
+                const filterCommon = document.getElementById('filterCommon').checked;
+                const filterWithVars = document.getElementById('filterWithVars').checked;
+                
+                let visibleCount = 0;
+                
+                paragraphItems.forEach(item => {
+                    const text = item.querySelector('.paragraph-text').textContent.toLowerCase();
+                    const isCommon = item.dataset.isCommon === 'true';
+                    const hasVars = item.dataset.hasVars === 'true';
+                    
+                    // Search filter
+                    const matchesSearch = searchText === '' || text.includes(searchText);
+                    
+                    // Common paragraphs filter
+                    const matchesCommon = !filterCommon || isCommon;
+                    
+                    // Variables filter
+                    const matchesVars = !filterWithVars || hasVars;
+                    
+                    // Apply all filters (AND logic)
+                    if (matchesSearch && matchesCommon && matchesVars) {
+                        item.style.display = '';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Update paragraph count
+                paragraphCount.textContent = visibleCount;
+            }
+            
+            // Apply sort function
+            function applySort() {
+                const sortBy = sortSelect.value;
+                const paragraphList = document.querySelector('.paragraph-list');
+                const items = Array.from(paragraphItems);
+                
+                items.sort((a, b) => {
+                    if (sortBy === 'position') {
+                        return parseInt(a.dataset.position) - parseInt(b.dataset.position);
+                    } else if (sortBy === 'length_desc') {
+                        return parseInt(b.dataset.length) - parseInt(a.dataset.length);
+                    } else if (sortBy === 'length_asc') {
+                        return parseInt(a.dataset.length) - parseInt(b.dataset.length);
+                    } else if (sortBy === 'doc_count_desc') {
+                        return parseInt(b.dataset.docCount) - parseInt(a.dataset.docCount);
+                    }
+                    return 0;
+                });
+                
+                // Remove all items
+                items.forEach(item => item.remove());
+                
+                // Add sorted items back (except the "Load More" button)
+                const loadMoreItem = document.getElementById('loadMoreParagraphs').closest('.list-group-item');
+                items.forEach(item => {
+                    paragraphList.insertBefore(item, loadMoreItem);
+                });
+            }
+            
+            // Load more paragraphs simulation
+            document.getElementById('loadMoreParagraphs').addEventListener('click', function() {
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+                this.disabled = true;
+                
+                // Simulate loading more paragraphs
+                setTimeout(() => {
+                    this.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Load More Paragraphs';
+                    this.disabled = false;
+                    
+                    // In a real app, you would fetch more paragraphs and append them
+                    alert('In a real app, this would load the next batch of paragraphs.');
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

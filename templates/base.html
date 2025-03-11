@@ -8,51 +8,64 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         body {
-            padding-top: 56px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
         
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+            margin-top: 56px; /* Navbar height */
+        }
+        
         .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background-color: #f8f9fa;
+            border-right: 1px solid rgba(0, 0, 0, .1);
+            overflow-y: auto;
+            height: calc(100vh - 56px);
             position: fixed;
             top: 56px;
-            bottom: 0;
             left: 0;
             z-index: 100;
-            padding: 48px 0 0;
-            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
         }
         
         .sidebar-sticky {
-            position: relative;
-            top: 0;
-            height: calc(100vh - 48px);
-            padding-top: .5rem;
-            overflow-x: hidden;
-            overflow-y: auto;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
         }
         
         .main-content {
-            margin-left: 220px;
+            flex-grow: 1;
             padding: 20px;
-            flex: 1;
+            margin-left: 220px; /* Same as sidebar width */
+            width: calc(100% - 220px); /* Full width minus sidebar */
         }
         
         @media (max-width: 768px) {
             .sidebar {
-                position: static;
-                padding: 20px 0;
+                position: fixed;
+                left: -220px;
+                transition: left 0.3s ease;
+                z-index: 1030;
+            }
+            
+            .sidebar.show {
+                left: 0;
             }
             
             .main-content {
                 margin-left: 0;
+                width: 100%;
             }
         }
         
         .nav-link {
             font-weight: 500;
             color: #333;
+            padding: 0.5rem 1rem;
         }
         
         .nav-link.active {
@@ -130,7 +143,7 @@
             <a class="navbar-brand" href="{{ url_for('index') }}">
                 <i class="bi bi-file-earmark-text"></i> Document Analyzer
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -170,83 +183,81 @@
         </div>
     </nav>
 
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-                <div class="sidebar-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
-                                <i class="bi bi-speedometer2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'upload' %}active{% endif %}" href="{{ url_for('upload') }}">
-                                <i class="bi bi-upload"></i> Upload Document
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'documents' %}active{% endif %}" href="{{ url_for('documents') }}">
-                                <i class="bi bi-file-earmark-text"></i> Document List
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'paragraphs' %}active{% endif %}" href="{{ url_for('paragraphs') }}">
-                                <i class="bi bi-paragraph"></i> Paragraph Analysis
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'variables' %}active{% endif %}" href="{{ url_for('variables') }}">
-                                <i class="bi bi-code-square"></i> Variable Analysis
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'templates' %}active{% endif %}" href="{{ url_for('templates') }}">
-                                <i class="bi bi-grid-3x3-gap"></i> Template Analysis
-                            </a>
-                        </li>
-                    </ul>
-                    
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Exports</span>
-                    </h6>
-                    <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('export_documents') }}">
-                                <i class="bi bi-file-earmark-excel"></i> Export Documents
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('export_variable_analysis') }}">
-                                <i class="bi bi-file-earmark-excel"></i> Export Variables
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('export_template_analysis') }}">
-                                <i class="bi bi-file-earmark-excel"></i> Export Templates
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
-            <!-- Main content -->
-            <main class="main-content">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+    <div class="content-wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'upload' %}active{% endif %}" href="{{ url_for('upload') }}">
+                            <i class="bi bi-upload me-2"></i> Upload Document
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'documents' %}active{% endif %}" href="{{ url_for('documents') }}">
+                            <i class="bi bi-file-earmark-text me-2"></i> Document List
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'paragraphs' %}active{% endif %}" href="{{ url_for('paragraphs') }}">
+                            <i class="bi bi-paragraph me-2"></i> Paragraph Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'variables' %}active{% endif %}" href="{{ url_for('variables') }}">
+                            <i class="bi bi-code-square me-2"></i> Variable Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'templates' %}active{% endif %}" href="{{ url_for('templates') }}">
+                            <i class="bi bi-grid-3x3-gap me-2"></i> Template Analysis
+                        </a>
+                    </li>
+                </ul>
                 
-                {% block content %}{% endblock %}
-            </main>
-        </div>
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Exports</span>
+                </h6>
+                <ul class="nav flex-column mb-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('export_documents') }}">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Export Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('export_variable_analysis') }}">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Export Variables
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('export_template_analysis') }}">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Export Templates
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
     </div>
     
     <!-- Footer -->
@@ -259,27 +270,41 @@
 
     {{ bootstrap.load_js() }}
     <script>
-        // Function to update processing status in footer
-        function updateProcessingStatus() {
-            fetch('/api/status')
-                .then(response => response.json())
-                .then(data => {
-                    let statusHtml = '';
-                    if (data.processing > 0 || data.queue_length > 0) {
-                        statusHtml = `<span class="spinner-border spinner-border-sm text-primary" role="status"></span> Processing ${data.processing} document(s), ${data.queue_length} in queue`;
-                    } else {
-                        statusHtml = `${data.processed}/${data.total} documents processed`;
-                        if (data.error > 0) {
-                            statusHtml += `, ${data.error} with errors`;
-                        }
-                    }
-                    document.getElementById('processing-status').innerHTML = statusHtml;
-                })
-                .catch(error => console.error('Error fetching status:', error));
-        }
-        
-        // Update status on page load and periodically
+        // Toggle sidebar on mobile
         document.addEventListener('DOMContentLoaded', function() {
+            const toggleSidebar = function() {
+                const sidebar = document.getElementById('sidebar');
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('show');
+                }
+            };
+
+            // Add event listener to navbar toggler
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            if (navbarToggler) {
+                navbarToggler.addEventListener('click', toggleSidebar);
+            }
+            
+            // Function to update processing status in footer
+            function updateProcessingStatus() {
+                fetch('/api/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        let statusHtml = '';
+                        if (data.processing > 0 || data.queue_length > 0) {
+                            statusHtml = `<span class="spinner-border spinner-border-sm text-primary" role="status"></span> Processing ${data.processing} document(s), ${data.queue_length} in queue`;
+                        } else {
+                            statusHtml = `${data.processed}/${data.total} documents processed`;
+                            if (data.error > 0) {
+                                statusHtml += `, ${data.error} with errors`;
+                            }
+                        }
+                        document.getElementById('processing-status').innerHTML = statusHtml;
+                    })
+                    .catch(error => console.error('Error fetching status:', error));
+            }
+            
+            // Update status on page load and periodically
             updateProcessingStatus();
             setInterval(updateProcessingStatus, 5000);
         });
