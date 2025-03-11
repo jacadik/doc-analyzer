@@ -4280,3 +4280,313 @@ FROM document
 WHERE document.processing_error IS NOT NULL) AS anon_1
 2025-03-11 14:17:17,976 - sqlalchemy.engine.Engine - INFO - [cached since 99.32s ago] ()
 2025-03-11 14:17:17,977 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-03-11 19:50:08,258 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 19:50:08,258 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 19:50:08,258 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 19:50:08,267 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:08,275 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 19:50:13,755 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 19:50:13,755 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 19:50:13,755 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:13,763 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 19:50:13,763 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:13,763 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 19:50:13,763 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:13,763 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 19:50:13,771 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:13,771 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 19:50:13,771 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:13,771 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 19:50:13,771 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:50:13,771 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 19:53:54,682 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:53:54,692 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:23,605 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 19:55:27,270 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:27,278 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 19:55:27,278 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:55:27,278 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:47,529 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 19:57:57,987 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 19:57:57,987 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 19:57:57,987 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:57:57,995 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 19:58:03,083 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 19:58:03,091 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 19:58:03,091 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:58:03,107 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 19:58:03,107 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:58:03,107 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 19:58:03,107 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:58:03,107 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 19:58:03,107 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:58:03,107 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 19:58:03,107 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:58:03,115 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 19:58:03,115 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 19:58:03,123 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 20:01:29,533 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 20:01:29,533 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 20:01:29,533 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:01:29,533 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:01:29,541 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 20:29:01,789 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 20:29:01,789 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:01,804 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 20:29:06,007 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 20:29:06,007 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_paragraph")
+2025-03-11 20:29:06,010 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:06,012 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph_similarity")
+2025-03-11 20:29:06,012 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:06,015 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document_variable")
+2025-03-11 20:29:06,015 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:06,017 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("document")
+2025-03-11 20:29:06,017 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:06,017 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("paragraph")
+2025-03-11 20:29:06,017 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:06,020 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("variable")
+2025-03-11 20:29:06,020 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-03-11 20:29:06,022 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-03-11 20:29:08,593 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) _post_configure_properties() started
+2025-03-11 20:29:08,593 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop paragraphs
+2025-03-11 20:29:08,601 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.paragraphs setup primary join document.id = document_paragraph.document_id
+2025-03-11 20:29:08,601 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.paragraphs setup secondary join paragraph.id = document_paragraph.paragraph_id
+2025-03-11 20:29:08,601 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.paragraphs synchronize pairs [(document.id => document_paragraph.document_id)]
+2025-03-11 20:29:08,601 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.paragraphs secondary synchronize pairs [(paragraph.id => document_paragraph.paragraph_id)]
+2025-03-11 20:29:08,601 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.paragraphs local/remote pairs [(document.id / document_paragraph.document_id),(paragraph.id / document_paragraph.paragraph_id)]
+2025-03-11 20:29:08,601 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.paragraphs remote columns [document_paragraph.document_id,document_paragraph.paragraph_id]
+2025-03-11 20:29:08,601 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.paragraphs local columns [document.id]
+2025-03-11 20:29:08,601 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.paragraphs relationship direction RelationshipDirection.MANYTOMANY
+2025-03-11 20:29:08,601 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) _configure_property(documents, RelationshipProperty)
+2025-03-11 20:29:08,609 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.documents setup primary join paragraph.id = document_paragraph.paragraph_id
+2025-03-11 20:29:08,609 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.documents setup secondary join document.id = document_paragraph.document_id
+2025-03-11 20:29:08,614 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.documents synchronize pairs [(paragraph.id => document_paragraph.paragraph_id)]
+2025-03-11 20:29:08,614 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.documents secondary synchronize pairs [(document.id => document_paragraph.document_id)]
+2025-03-11 20:29:08,614 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.documents local/remote pairs [(paragraph.id / document_paragraph.paragraph_id),(document.id / document_paragraph.document_id)]
+2025-03-11 20:29:08,614 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.documents remote columns [document_paragraph.paragraph_id,document_paragraph.document_id]
+2025-03-11 20:29:08,614 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.documents local columns [paragraph.id]
+2025-03-11 20:29:08,614 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.documents relationship direction RelationshipDirection.MANYTOMANY
+2025-03-11 20:29:08,614 - sqlalchemy.orm.strategies.LazyLoader - INFO - Paragraph.documents lazy loading clause :param_1 = document_paragraph.paragraph_id AND document.id = document_paragraph.document_id
+2025-03-11 20:29:08,622 - sqlalchemy.orm.strategies.LazyLoader - INFO - Document.paragraphs lazy loading clause :param_1 = document_paragraph.document_id AND paragraph.id = document_paragraph.paragraph_id
+2025-03-11 20:29:08,622 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop variables
+2025-03-11 20:29:08,622 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.variables setup primary join document.id = document_variable.document_id
+2025-03-11 20:29:08,622 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.variables setup secondary join variable.id = document_variable.variable_id
+2025-03-11 20:29:08,622 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.variables synchronize pairs [(document.id => document_variable.document_id)]
+2025-03-11 20:29:08,622 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.variables secondary synchronize pairs [(variable.id => document_variable.variable_id)]
+2025-03-11 20:29:08,622 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.variables local/remote pairs [(document.id / document_variable.document_id),(variable.id / document_variable.variable_id)]
+2025-03-11 20:29:08,622 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.variables remote columns [document_variable.document_id,document_variable.variable_id]
+2025-03-11 20:29:08,622 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.variables local columns [document.id]
+2025-03-11 20:29:08,630 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Document.variables relationship direction RelationshipDirection.MANYTOMANY
+2025-03-11 20:29:08,630 - sqlalchemy.orm.mapper.Mapper - INFO - (Variable|variable) _configure_property(documents, RelationshipProperty)
+2025-03-11 20:29:08,632 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Variable.documents setup primary join variable.id = document_variable.variable_id
+2025-03-11 20:29:08,632 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Variable.documents setup secondary join document.id = document_variable.document_id
+2025-03-11 20:29:08,632 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Variable.documents synchronize pairs [(variable.id => document_variable.variable_id)]
+2025-03-11 20:29:08,632 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Variable.documents secondary synchronize pairs [(document.id => document_variable.document_id)]
+2025-03-11 20:29:08,632 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Variable.documents local/remote pairs [(variable.id / document_variable.variable_id),(document.id / document_variable.document_id)]
+2025-03-11 20:29:08,632 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Variable.documents remote columns [document_variable.document_id,document_variable.variable_id]
+2025-03-11 20:29:08,632 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Variable.documents local columns [variable.id]
+2025-03-11 20:29:08,632 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Variable.documents relationship direction RelationshipDirection.MANYTOMANY
+2025-03-11 20:29:08,632 - sqlalchemy.orm.strategies.LazyLoader - INFO - Variable.documents lazy loading clause :param_1 = document_variable.variable_id AND document.id = document_variable.document_id
+2025-03-11 20:29:08,632 - sqlalchemy.orm.strategies.LazyLoader - INFO - Document.variables lazy loading clause :param_1 = document_variable.document_id AND variable.id = document_variable.variable_id
+2025-03-11 20:29:08,632 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop id
+2025-03-11 20:29:08,632 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop filename
+2025-03-11 20:29:08,632 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop original_filename
+2025-03-11 20:29:08,632 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop file_type
+2025-03-11 20:29:08,632 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop file_size
+2025-03-11 20:29:08,632 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop page_count
+2025-03-11 20:29:08,632 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop upload_date
+2025-03-11 20:29:08,647 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop processed
+2025-03-11 20:29:08,647 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop processing_error
+2025-03-11 20:29:08,651 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop full_text
+2025-03-11 20:29:08,651 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) initialize prop layout_info
+2025-03-11 20:29:08,651 - sqlalchemy.orm.mapper.Mapper - INFO - (Document|document) _post_configure_properties() complete
+2025-03-11 20:29:08,651 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) _post_configure_properties() started
+2025-03-11 20:29:08,651 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) initialize prop similar_paragraphs
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_paragraphs setup primary join paragraph_similarity.paragraph_id = paragraph.id
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_paragraphs setup secondary join paragraph_similarity.similar_paragraph_id = paragraph.id
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_paragraphs synchronize pairs [(paragraph.id => paragraph_similarity.paragraph_id)]
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_paragraphs secondary synchronize pairs [(paragraph.id => paragraph_similarity.similar_paragraph_id)]
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_paragraphs local/remote pairs [(paragraph.id / paragraph_similarity.paragraph_id),(paragraph.id / paragraph_similarity.similar_paragraph_id)]
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_paragraphs remote columns [paragraph_similarity.similar_paragraph_id,paragraph_similarity.paragraph_id]
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_paragraphs local columns [paragraph.id]
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_paragraphs relationship direction RelationshipDirection.MANYTOMANY
+2025-03-11 20:29:08,651 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) _configure_property(similar_to, RelationshipProperty)
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_to setup primary join paragraph_similarity.similar_paragraph_id = paragraph.id
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_to setup secondary join paragraph_similarity.paragraph_id = paragraph.id
+2025-03-11 20:29:08,651 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_to synchronize pairs [(paragraph.id => paragraph_similarity.similar_paragraph_id)]
+2025-03-11 20:29:08,663 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_to secondary synchronize pairs [(paragraph.id => paragraph_similarity.paragraph_id)]
+2025-03-11 20:29:08,664 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_to local/remote pairs [(paragraph.id / paragraph_similarity.similar_paragraph_id),(paragraph.id / paragraph_similarity.paragraph_id)]
+2025-03-11 20:29:08,664 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_to remote columns [paragraph_similarity.similar_paragraph_id,paragraph_similarity.paragraph_id]
+2025-03-11 20:29:08,664 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_to local columns [paragraph.id]
+2025-03-11 20:29:08,664 - sqlalchemy.orm.relationships.RelationshipProperty - INFO - Paragraph.similar_to relationship direction RelationshipDirection.MANYTOMANY
+2025-03-11 20:29:08,664 - sqlalchemy.orm.strategies.LazyLoader - INFO - Paragraph.similar_to lazy loading clause paragraph_similarity.similar_paragraph_id = :param_1 AND paragraph_similarity.paragraph_id = paragraph.id
+2025-03-11 20:29:08,664 - sqlalchemy.orm.strategies.LazyLoader - INFO - Paragraph.similar_paragraphs lazy loading clause paragraph_similarity.paragraph_id = :param_1 AND paragraph_similarity.similar_paragraph_id = paragraph.id
+2025-03-11 20:29:08,664 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) initialize prop id
+2025-03-11 20:29:08,664 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) initialize prop text
+2025-03-11 20:29:08,664 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) initialize prop hash
+2025-03-11 20:29:08,664 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) initialize prop position
+2025-03-11 20:29:08,672 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) initialize prop documents
+2025-03-11 20:29:08,672 - sqlalchemy.orm.mapper.Mapper - INFO - (Paragraph|paragraph) _post_configure_properties() complete
+2025-03-11 20:29:08,672 - sqlalchemy.orm.mapper.Mapper - INFO - (Variable|variable) _post_configure_properties() started
+2025-03-11 20:29:08,672 - sqlalchemy.orm.mapper.Mapper - INFO - (Variable|variable) initialize prop id
+2025-03-11 20:29:08,672 - sqlalchemy.orm.mapper.Mapper - INFO - (Variable|variable) initialize prop name
+2025-03-11 20:29:08,672 - sqlalchemy.orm.mapper.Mapper - INFO - (Variable|variable) initialize prop pattern_type
+2025-03-11 20:29:08,672 - sqlalchemy.orm.mapper.Mapper - INFO - (Variable|variable) initialize prop documents
+2025-03-11 20:29:08,672 - sqlalchemy.orm.mapper.Mapper - INFO - (Variable|variable) _post_configure_properties() complete
+2025-03-11 20:29:08,672 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 20:29:08,682 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document) AS anon_1
+2025-03-11 20:29:08,682 - sqlalchemy.engine.Engine - INFO - [generated in 0.00067s] ()
+2025-03-11 20:29:08,682 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT paragraph.id AS paragraph_id, paragraph.text AS paragraph_text, paragraph.hash AS paragraph_hash, paragraph.position AS paragraph_position 
+FROM paragraph) AS anon_1
+2025-03-11 20:29:08,682 - sqlalchemy.engine.Engine - INFO - [generated in 0.00081s] ()
+2025-03-11 20:29:08,698 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT variable.id AS variable_id, variable.name AS variable_name, variable.pattern_type AS variable_pattern_type 
+FROM variable) AS anon_1
+2025-03-11 20:29:08,698 - sqlalchemy.engine.Engine - INFO - [generated in 0.00110s] ()
+2025-03-11 20:29:08,701 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document 
+WHERE document.processed = 0 AND document.processing_error IS NULL) AS anon_1
+2025-03-11 20:29:08,701 - sqlalchemy.engine.Engine - INFO - [generated in 0.00076s] ()
+2025-03-11 20:29:08,709 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document 
+WHERE document.processing_error IS NOT NULL) AS anon_1
+2025-03-11 20:29:08,709 - sqlalchemy.engine.Engine - INFO - [generated in 0.00082s] ()
+2025-03-11 20:29:08,715 - sqlalchemy.engine.Engine - INFO - SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document ORDER BY document.upload_date DESC
+ LIMIT ? OFFSET ?
+2025-03-11 20:29:08,715 - sqlalchemy.engine.Engine - INFO - [generated in 0.00107s] (5, 0)
+2025-03-11 20:29:08,782 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-03-11 20:29:09,204 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 20:29:09,206 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document) AS anon_1
+2025-03-11 20:29:09,206 - sqlalchemy.engine.Engine - INFO - [cached since 0.5209s ago] ()
+2025-03-11 20:29:09,206 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document 
+WHERE document.processed = 1) AS anon_1
+2025-03-11 20:29:09,214 - sqlalchemy.engine.Engine - INFO - [generated in 0.00144s] ()
+2025-03-11 20:29:09,217 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document 
+WHERE document.processed = 0 AND document.processing_error IS NULL) AS anon_1
+2025-03-11 20:29:09,217 - sqlalchemy.engine.Engine - INFO - [cached since 0.514s ago] ()
+2025-03-11 20:29:09,217 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document 
+WHERE document.processing_error IS NOT NULL) AS anon_1
+2025-03-11 20:29:09,217 - sqlalchemy.engine.Engine - INFO - [cached since 0.5112s ago] ()
+2025-03-11 20:29:09,225 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document) AS anon_1
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - [cached since 5.533s ago] ()
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document 
+WHERE document.processed = 1) AS anon_1
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - [cached since 5.008s ago] ()
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document 
+WHERE document.processed = 0 AND document.processing_error IS NULL) AS anon_1
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - [cached since 5.518s ago] ()
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.page_count AS document_page_count, document.upload_date AS document_upload_date, document.processed AS document_processed, document.processing_error AS document_processing_error, document.full_text AS document_full_text, document.layout_info AS document_layout_info 
+FROM document 
+WHERE document.processing_error IS NOT NULL) AS anon_1
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - [cached since 5.514s ago] ()
+2025-03-11 20:29:14,218 - sqlalchemy.engine.Engine - INFO - ROLLBACK

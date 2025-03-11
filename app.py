@@ -29,10 +29,8 @@ class BulkUploadForm(FlaskForm):
     files = MultipleFileField('Select Files', validators=[
         FileAllowed(['pdf', 'docx'], 'Only PDF and DOCX files are allowed!')
     ])
-    folder = FileField('Select Folder', validators=[
-        FileAllowed(['pdf', 'docx'], 'Only PDF and DOCX files are allowed!')
-    ])
-    process_immediately = BooleanField('Process Immediately After Upload')
+    folder = MultipleFileField('Select Folder') # Changed to MultipleFileField to support folder uploads
+    process_immediately = BooleanField('Process Immediately After Upload', default=True)
     enable_batch_size = BooleanField('Enable Batch Processing')
     batch_size = IntegerField('Batch Size (5-100)', default=20)
     submit = SubmitField('Upload')
@@ -230,14 +228,17 @@ class DocumentProcessingQueue:
 # Create document processing queue with 4 worker threads
 doc_queue = DocumentProcessingQueue(max_workers=4)
 
-# Create database tables
-@app.before_first_request
+# Create tables and initialize app (Flask 2.x compatible)
 def create_tables():
-    db.create_all()
-    # Ensure export directory exists
-    os.makedirs('exports', exist_ok=True)
-    # Start background processing thread
-    doc_queue.start()
+    with app.app_context():
+        db.create_all()
+        # Ensure export directory exists
+        os.makedirs('exports', exist_ok=True)
+        # Start background processing thread
+        doc_queue.start()
+
+# Call the initialization function immediately
+create_tables()
 
 # Error handlers
 @app.errorhandler(404)
@@ -293,6 +294,9 @@ def upload():
                 pass
         
         # Check which form is being submitted
+        uploaded_docs = []
+        failed_files = []
+        
         if 'files' in request.files:  # Regular file upload
             files = request.files.getlist('files')
             
@@ -301,11 +305,8 @@ def upload():
                 return render_template('upload.html', form=form)
             
             # Process all valid files
-            uploaded_docs = []
-            failed_files = []
-            
             for file in files:
-                if file and allowed_file(file.filename, app.config['ALLOWED_EXTENSIONS']):
+                if file and file.filename and allowed_file(file.filename, app.config['ALLOWED_EXTENSIONS']):
                     try:
                         result = save_uploaded_file(file, app.config['UPLOAD_FOLDER'], app.config['ALLOWED_EXTENSIONS'])
                         
@@ -330,30 +331,9 @@ def upload():
                         app.logger.error(f"Error uploading file {file.filename}: {e}", exc_info=True)
                         failed_files.append(file.filename)
                 else:
-                    failed_files.append(file.filename)
+                    if file and file.filename:
+                        failed_files.append(file.filename)
             
-            # Add to processing queue if needed
-            if process_immediately and uploaded_docs:
-                doc_ids = [doc.id for doc in uploaded_docs]
-                doc_queue.add_documents(doc_ids)
-                
-                if enable_batch_size:
-                    doc_queue.batch_size = batch_size
-                
-                # Start queue if not already running
-                if not doc_queue.is_processing:
-                    doc_queue.start()
-            
-            # Flash message
-            if uploaded_docs:
-                flash(f'Successfully uploaded {len(uploaded_docs)} documents.', 'success')
-                if failed_files:
-                    flash(f'Failed to upload {len(failed_files)} files.', 'warning')
-            else:
-                flash('Failed to upload any documents.', 'danger')
-            
-            return redirect(url_for('documents'))
-        
         elif 'folder' in request.files:  # Folder upload
             files = request.files.getlist('folder')
             
@@ -374,9 +354,6 @@ def upload():
                 return render_template('upload.html', form=form)
             
             # Process all valid files
-            uploaded_docs = []
-            failed_files = []
-            
             for file in valid_files:
                 try:
                     result = save_uploaded_file(file, app.config['UPLOAD_FOLDER'], app.config['ALLOWED_EXTENSIONS'])
@@ -401,28 +378,28 @@ def upload():
                 except Exception as e:
                     app.logger.error(f"Error uploading file {file.filename}: {e}", exc_info=True)
                     failed_files.append(file.filename)
+        
+        # Add to processing queue if needed
+        if process_immediately and uploaded_docs:
+            doc_ids = [doc.id for doc in uploaded_docs]
+            doc_queue.add_documents(doc_ids)
             
-            # Add to processing queue if needed
-            if process_immediately and uploaded_docs:
-                doc_ids = [doc.id for doc in uploaded_docs]
-                doc_queue.add_documents(doc_ids)
-                
-                if enable_batch_size:
-                    doc_queue.batch_size = batch_size
-                
-                # Start queue if not already running
-                if not doc_queue.is_processing:
-                    doc_queue.start()
+            if enable_batch_size:
+                doc_queue.batch_size = batch_size
             
-            # Flash message
-            if uploaded_docs:
-                flash(f'Successfully uploaded {len(uploaded_docs)} documents from folder.', 'success')
-                if failed_files:
-                    flash(f'Failed to upload {len(failed_files)} files.', 'warning')
-            else:
-                flash('Failed to upload any documents from folder.', 'danger')
-            
-            return redirect(url_for('documents'))
+            # Start queue if not already running
+            if not doc_queue.is_processing or doc_queue.is_paused:
+                doc_queue.resume() if doc_queue.is_paused else doc_queue.start()
+        
+        # Flash message
+        if uploaded_docs:
+            flash(f'Successfully uploaded {len(uploaded_docs)} documents.', 'success')
+            if failed_files:
+                flash(f'Failed to upload {len(failed_files)} files.', 'warning')
+        else:
+            flash('Failed to upload any documents.', 'danger')
+        
+        return redirect(url_for('documents'))
     
     # GET request - render the upload form
     return render_template('upload.html', form=form)
@@ -995,6 +972,11 @@ def bulk_operations():
                           error_count=error_count,
                           queue_status=queue_status,
                           error_docs=error_docs)
+
+# Helper function for checking allowed file types
+def allowed_file(filename, allowed_extensions):
+    """Check if a file has an allowed extension"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
 # Main entry point
 if __name__ == '__main__':

@@ -17,12 +17,6 @@ def allowed_file(filename, allowed_extensions):
 
 def save_uploaded_file(file, upload_folder, allowed_extensions):
     """Save an uploaded file to the configured upload folder"""
-    # Handle case where file is a list (multiple file upload)
-    if isinstance(file, list):
-        if not file:  # Empty list
-            return None
-        file = file[0]  # Take the first file
-    
     if file and hasattr(file, 'filename') and allowed_file(file.filename, allowed_extensions):
         # Secure the filename
         original_filename = file.filename
@@ -49,7 +43,7 @@ def save_uploaded_file(file, upload_folder, allowed_extensions):
         }
     
     return None
-
+	
 def extract_text_from_pdf(file_path):
     """Extract text and basic layout information from a PDF file"""
     try:
