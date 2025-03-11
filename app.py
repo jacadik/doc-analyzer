@@ -7,7 +7,7 @@ from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import SubmitField
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, Document, Paragraph, Variable
+from models import db, Document, Paragraph, Variable, document_paragraph, document_variable, paragraph_similarity
 from utils.document import save_uploaded_file, process_document
 from utils.analyzer import find_exact_duplicates, find_similar_paragraphs, analyze_variable_usage, get_paragraph_statistics, extract_common_phrases
 from utils.export import export_documents_to_excel, export_analysis_to_excel, export_templates_to_excel, export_variables_to_excel
@@ -15,6 +15,7 @@ import json
 from datetime import datetime
 import time
 import threading
+
 
 # File upload form
 class UploadForm(FlaskForm):
@@ -156,14 +157,18 @@ def start_background_thread():
         background_thread.daemon = True
         background_thread.start()
 
-# Create database tables
-@app.before_first_request
+# Create database tables and initialize app
+# Replacing @app.before_first_request which is removed in Flask 2.x
 def create_tables():
     db.create_all()
     # Ensure export directory exists
     os.makedirs('exports', exist_ok=True)
     # Start background processing thread
     start_background_thread()
+
+# Initialize the app with a context
+with app.app_context():
+    create_tables()
 
 # Error handlers
 @app.errorhandler(404)
